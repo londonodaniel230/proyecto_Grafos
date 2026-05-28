@@ -7,6 +7,8 @@ export class MapRenderer {
     this.map = null;
     this.nodeLayer = null;
     this.edgeLayer = null;
+    this.routeLayer = null;
+    this.routeResult = null;
     this.colors = this._loadColors();
     this._initMap();
   }
@@ -19,6 +21,8 @@ export class MapRenderer {
 
   setGraph(graph) {
     this.graph = graph;
+    this.routeResult = null;
+    this._clearRoute();
     this._render();
     this._updateStats();
     this._setDetailsLines(["Selecciona un pais en el mapa para ver detalles."]);
@@ -26,9 +30,60 @@ export class MapRenderer {
 
   clear() {
     this.graph = null;
+    this.routeResult = null;
     this._clearLayers();
+    this._clearRoute();
     this._updateStats();
     this._setDetailsLines(["Sin datos cargados."]);
+  }
+
+  setRouteResult(routeResult) {
+    this.routeResult = routeResult;
+    this._clearRoute();
+
+    if (!this.graph || !routeResult || !routeResult.encontrado) {
+      return;
+    }
+
+    const nodeById = new Map(
+      this.graph.nodos.map((node) => [node.id, node])
+    );
+
+    const coords = [];
+    (routeResult.camino || []).forEach((nodeId) => {
+      const node = nodeById.get(nodeId);
+      if (this._hasCoords(node)) {
+        coords.push([node.lat, node.lon]);
+      }
+    });
+
+    if (coords.length >= 2) {
+      const line = L.polyline(coords, {
+        color: this.colors.route,
+        weight: 3,
+        opacity: 0.9,
+      });
+      line.addTo(this.routeLayer);
+    }
+
+    const totalKm =
+      typeof routeResult.totalKm === "number" ? routeResult.totalKm : null;
+    const totalCosto =
+      typeof routeResult.totalCosto === "number" ? routeResult.totalCosto : null;
+    const camino = (routeResult.camino || []).join(" -> ");
+    const lines = [
+      "Ruta por menor costo:",
+      camino || "(sin ruta)",
+    ];
+
+    if (totalKm !== null) {
+      lines.push(`Distancia total: ${totalKm.toFixed(2)} km`);
+    }
+    if (totalCosto !== null) {
+      lines.push(`Costo total: ${totalCosto.toFixed(2)} USD`);
+    }
+
+    this._setDetailsLines(lines);
   }
 
   _initMap() {
@@ -44,6 +99,7 @@ export class MapRenderer {
     }).addTo(this.map);
 
     this.edgeLayer = L.layerGroup().addTo(this.map);
+    this.routeLayer = L.layerGroup().addTo(this.map);
     this.nodeLayer = L.layerGroup().addTo(this.map);
     this.map.setView([15, 0], 2);
   }
@@ -121,6 +177,12 @@ export class MapRenderer {
     }
   }
 
+  _clearRoute() {
+    if (this.routeLayer) {
+      this.routeLayer.clearLayers();
+    }
+  }
+
   _hasCoords(node) {
     return node && typeof node.lat === "number" && typeof node.lon === "number";
   }
@@ -176,6 +238,7 @@ export class MapRenderer {
       hub: read("--hub", "#e76f51"),
       edge: read("--edge", "rgba(15, 23, 42, 0.3)"),
       nodeStroke: read("--label", "#0f172a"),
+      route: read("--accent", "#0ea5a4"),
     };
   }
 }

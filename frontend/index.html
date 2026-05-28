@@ -52,6 +52,39 @@
           </div>
         </div>
         <div class="panel-block">
+          <h2>Buscar ruta (menor costo)</h2>
+          <form id="search-form" class="route-form">
+            <div class="field">
+              <label for="search-origin-country">Pais origen</label>
+              <input id="search-origin-country" type="text" list="search-origin-suggestions"
+                placeholder="Ej: Colombia" autocomplete="off" />
+              <datalist id="search-origin-suggestions"></datalist>
+            </div>
+            <div class="field">
+              <label for="search-destination-country">Pais destino</label>
+              <input id="search-destination-country" type="text" list="search-destination-suggestions"
+                placeholder="Ej: Peru" autocomplete="off" />
+              <datalist id="search-destination-suggestions"></datalist>
+            </div>
+            <div class="field-grid">
+              <div class="field">
+                <label for="search-budget">Presupuesto total (USD)</label>
+                <input id="search-budget" type="number" step="0.01" min="0" />
+              </div>
+              <div class="field">
+                <label for="search-aircraft">Aeronaves permitidas (coma)</label>
+                <input id="search-aircraft" type="text" placeholder="A320, B737" />
+              </div>
+            </div>
+            <div class="checkbox-row">
+              <label><input id="search-lodging" type="checkbox" checked /> Incluir alojamiento</label>
+              <label><input id="search-food" type="checkbox" checked /> Incluir alimentacion</label>
+              <label><input id="search-work" type="checkbox" checked /> Incluir trabajos</label>
+            </div>
+            <button class="primary" type="submit">Buscar menor costo</button>
+          </form>
+        </div>
+        <div class="panel-block">
           <h2>Agregar ruta</h2>
           <form id="route-form" class="route-form">
             <div class="field">

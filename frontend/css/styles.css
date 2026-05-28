@@ -156,6 +156,19 @@ input[type="file"] {
   font-size: 0.9rem;
 }
 
+.checkbox-row {
+  display: grid;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--ink);
+}
+
+.checkbox-row label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .field {
   display: grid;
   gap: 6px;

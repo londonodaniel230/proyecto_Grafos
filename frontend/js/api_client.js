@@ -46,4 +46,25 @@ export class ApiClient {
 
     return data && data.results ? data.results : [];
   }
+
+  async optimizeRoute(payload) {
+    const response = await fetch("/api/route", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    let data = null;
+    const contentType = response.headers.get("content-type") || "";
+    if (contentType.includes("application/json")) {
+      data = await response.json();
+    }
+
+    if (!response.ok) {
+      const messages = data && data.errors ? data.errors : ["Unknown server error."];
+      throw new ApiError(messages);
+    }
+
+    return data;
+  }
 }

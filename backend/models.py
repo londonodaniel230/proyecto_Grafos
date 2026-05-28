@@ -198,6 +198,7 @@ class RouteResult:
     pasos       : lista de RouteStep con el detalle de cada tramo.
     total_km    : distancia total de la ruta en km
                   (math.inf si no se encontró ruta).
+    total_costo : costo total de la ruta (USD) si aplica.
     encontrado  : True si existe una ruta válida, False en caso contrario.
     error       : mensaje descriptivo cuando ``encontrado`` es False.
     """
@@ -206,13 +207,20 @@ class RouteResult:
     pasos: List[RouteStep]
     total_km: float
     encontrado: bool
+    total_costo: Optional[float] = None
     error: Optional[str] = None
 
     def to_dict(self) -> Dict[str, object]:
+        total_km = self.total_km if not math.isinf(self.total_km) else None
+        total_costo = None
+        if self.total_costo is not None and not math.isinf(self.total_costo):
+            total_costo = self.total_costo
+
         return {
             "camino": self.camino,
             "pasos": [paso.to_dict() for paso in self.pasos],
-            "totalKm": self.total_km if not math.isinf(self.total_km) else None,
+            "totalKm": total_km,
+            "totalCosto": total_costo,
             "encontrado": self.encontrado,
             "error": self.error,
         }

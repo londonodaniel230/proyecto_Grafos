@@ -8,15 +8,19 @@ algoritmo correcto y devuelve un RouteResult uniforme.
 
 Modos soportados actualmente:
     "distancia"  →  dijkstra_por_distancia   (responsabilidad DANIEL)
+    "costo"      →  dijkstra_por_costo       (responsabilidad TAiKK)
 """
 
+from typing import Optional
+
 from ..models import Graph, RouteResult
-from .path_algorithms import dijkstra_por_distancia
+from .path_algorithms import CostOptions, dijkstra_por_costo, dijkstra_por_distancia
 
 
 # Registro de algoritmos disponibles por modo
 _ALGORITMOS = {
     "distancia": dijkstra_por_distancia,
+    "costo": dijkstra_por_costo,
 }
 
 
@@ -25,6 +29,10 @@ def optimizar_ruta(
     inicio_id: str,
     destino_id: str,
     modo: str = "distancia",
+    presupuesto_total: Optional[float] = None,
+    opciones: Optional[CostOptions] = None,
+    inicio_ids: Optional[list] = None,
+    destino_ids: Optional[list] = None,
 ) -> RouteResult:
     """
     Calcula la ruta óptima entre dos nodos según el modo indicado.
@@ -35,8 +43,14 @@ def optimizar_ruta(
     inicio_id  : str    – ID del nodo origen.
     destino_id : str    – ID del nodo destino.
     modo       : str    – criterio de optimización.
-                         Valores aceptados: "distancia"
-                         (extensible: "costo", "tiempo", …).
+                         Valores aceptados: "distancia", "costo"
+                         (extensible: "tiempo", …).
+    presupuesto_total : float | None – presupuesto maximo (USD) para el modo
+                         "costo". Si es None, no se valida presupuesto.
+    opciones  : CostOptions | None – opciones de costo (aeronaves, alimentacion,
+                alojamiento, trabajo).
+    inicio_ids : list | None – lista de IDs de origen (opcional).
+    destino_ids: list | None – lista de IDs de destino (opcional).
 
     Retorna
     -------
@@ -59,6 +73,16 @@ def optimizar_ruta(
         )
 
     algoritmo = _ALGORITMOS[modo_normalizado]
+    if modo_normalizado == "costo":
+        return algoritmo(
+            graph,
+            inicio_id,
+            destino_id,
+            presupuesto_total=presupuesto_total,
+            opciones=opciones,
+            inicio_ids=inicio_ids,
+            destino_ids=destino_ids,
+        )
     return algoritmo(graph, inicio_id, destino_id)
 
 

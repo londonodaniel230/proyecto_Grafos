@@ -3,6 +3,8 @@ from flask import Blueprint, jsonify, request
 from .errors import ValidationError
 from .services.geocoding import geocode_country
 from .services.graph_loader import GraphLoader
+from .services.path_algorithms import CostOptions
+from .services.route_optimizer import optimizar_ruta
 
 api_bp = Blueprint("api", __name__, url_prefix="/api")
 
@@ -21,6 +23,81 @@ def upload_graph():
         return jsonify(graph.to_dict())
     except ValidationError as exc:
         return jsonify({"errors": exc.errors}), 400
+
+
+@api_bp.post("/route")
+def optimize_route():
+    loader = GraphLoader()
+    try:
+        payload = _get_payload()
+        if not isinstance(payload, dict):
+            raise ValidationError(["JSON body must be an object."])
+
+        graph_payload = payload.get("graph")
+        if graph_payload is None:
+            raise ValidationError(["Missing graph payload."])
+
+        graph = loader.load(graph_payload)
+
+        inicio_ids = payload.get("inicioIds") or payload.get("inicio_ids")
+        destino_ids = payload.get("destinoIds") or payload.get("destino_ids")
+
+        inicio_id = (payload.get("inicioId") or payload.get("inicio_id") or "").strip()
+        destino_id = (payload.get("destinoId") or payload.get("destino_id") or "").strip()
+
+        if inicio_ids is not None and not isinstance(inicio_ids, list):
+            raise ValidationError(["inicioIds must be an array."])
+        if destino_ids is not None and not isinstance(destino_ids, list):
+            raise ValidationError(["destinoIds must be an array."])
+
+        if inicio_ids:
+            inicio_ids = [str(item).strip() for item in inicio_ids if str(item).strip()]
+        if destino_ids:
+            destino_ids = [str(item).strip() for item in destino_ids if str(item).strip()]
+
+        if inicio_ids or destino_ids:
+            if not inicio_ids or not destino_ids:
+                raise ValidationError([
+                    "inicioIds and destinoIds are required when using arrays."
+                ])
+            inicio_id = inicio_ids[0]
+            destino_id = destino_ids[0]
+        elif not inicio_id or not destino_id:
+            raise ValidationError(["inicioId and destinoId are required."])
+
+        modo = (payload.get("modo") or "distancia").strip().lower()
+        presupuesto_total = payload.get("presupuestoTotal")
+        if presupuesto_total is not None:
+            presupuesto_total = float(presupuesto_total)
+
+        opciones_raw = payload.get("opciones") or {}
+        aeronaves_raw = opciones_raw.get("aeronaves") or []
+        aeronaves = None
+        if isinstance(aeronaves_raw, list):
+            aeronaves = {str(item).strip().lower() for item in aeronaves_raw if str(item).strip()}
+
+        opciones = CostOptions(
+            aeronaves_permitidas=aeronaves,
+            incluir_alojamiento=bool(opciones_raw.get("incluirAlojamiento", True)),
+            incluir_alimentacion=bool(opciones_raw.get("incluirAlimentacion", True)),
+            incluir_trabajo=bool(opciones_raw.get("incluirTrabajo", True)),
+        )
+
+        resultado = optimizar_ruta(
+            graph,
+            inicio_id,
+            destino_id,
+            modo=modo,
+            presupuesto_total=presupuesto_total,
+            opciones=opciones,
+            inicio_ids=inicio_ids,
+            destino_ids=destino_ids,
+        )
+        return jsonify(resultado.to_dict())
+    except ValidationError as exc:
+        return jsonify({"errors": exc.errors}), 400
+    except ValueError:
+        return jsonify({"errors": ["Invalid numeric values."]}), 400
 
 
 @api_bp.get("/geocode")

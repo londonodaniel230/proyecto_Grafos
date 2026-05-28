@@ -38,6 +38,21 @@ export class GraphStore {
     );
   }
 
+  findNodesByCountry(country) {
+    if (!this.graph) {
+      return [];
+    }
+
+    const key = normalizeName(country);
+    return this.graph.nodos.filter((node) => {
+      return (
+        normalizeName(node.pais) === key ||
+        normalizeName(node.nombre) === key ||
+        normalizeName(node.id) === key
+      );
+    });
+  }
+
   upsertNode(node) {
     if (!this.graph) {
       return;
