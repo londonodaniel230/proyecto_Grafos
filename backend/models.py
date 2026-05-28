@@ -1,6 +1,24 @@
-from dataclasses import dataclass
+# -*- coding: utf-8 -*-
+"""
+models.py
+Modelos de datos del backend.
+
+Clases originales (sin cambios):
+    Activity, Job, Node, Edge, AircraftConfig, GlobalConfig, Graph
+
+Clases añadidas por PERSONA 1 – Algoritmos y lógica de rutas:
+    RouteStep   – detalle de un tramo individual dentro de una ruta.
+    RouteResult – resultado completo devuelto por los algoritmos de ruta.
+"""
+
+import math
+from dataclasses import dataclass, field
 from typing import Dict, List, Optional
 
+
+# ===========================================================================
+# Modelos originales (NO MODIFICAR)
+# ===========================================================================
 
 @dataclass(frozen=True)
 class Activity:
@@ -130,4 +148,71 @@ class Graph:
             "nodos": [nodo.to_dict() for nodo in self.nodos],
             "aristas": [arista.to_dict() for arista in self.aristas],
             "configuracion": self.configuracion.to_dict() if self.configuracion else None,
+        }
+
+
+# ===========================================================================
+# Nuevos modelos – PERSONA 1 / Algoritmos y lógica de rutas
+# ===========================================================================
+
+@dataclass
+class RouteStep:
+    """
+    Representa un tramo individual dentro de una ruta calculada.
+
+    Atributos
+    ---------
+    origen                : ID del nodo de salida del tramo.
+    destino               : ID del nodo de llegada del tramo.
+    distancia_km          : distancia de este tramo en kilómetros.
+    distancia_acumulada_km: distancia total recorrida hasta llegar a ``destino``.
+    aeronave              : tipo de aeronave disponible para el tramo (puede
+                            ser None si la arista no especifica ninguna).
+    """
+
+    origen: str
+    destino: str
+    distancia_km: float
+    distancia_acumulada_km: float
+    aeronave: Optional[str] = None
+
+    def to_dict(self) -> Dict[str, object]:
+        return {
+            "origen": self.origen,
+            "destino": self.destino,
+            "distanciaKm": self.distancia_km,
+            "distanciaAcumuladaKm": self.distancia_acumulada_km,
+            "aeronave": self.aeronave,
+        }
+
+
+@dataclass
+class RouteResult:
+    """
+    Resultado completo devuelto por cualquier algoritmo de ruta.
+
+    Atributos
+    ---------
+    camino      : lista de IDs de nodos en orden de visita
+                  (vacía si no se encontró ruta).
+    pasos       : lista de RouteStep con el detalle de cada tramo.
+    total_km    : distancia total de la ruta en km
+                  (math.inf si no se encontró ruta).
+    encontrado  : True si existe una ruta válida, False en caso contrario.
+    error       : mensaje descriptivo cuando ``encontrado`` es False.
+    """
+
+    camino: List[str]
+    pasos: List[RouteStep]
+    total_km: float
+    encontrado: bool
+    error: Optional[str] = None
+
+    def to_dict(self) -> Dict[str, object]:
+        return {
+            "camino": self.camino,
+            "pasos": [paso.to_dict() for paso in self.pasos],
+            "totalKm": self.total_km if not math.isinf(self.total_km) else None,
+            "encontrado": self.encontrado,
+            "error": self.error,
         }
