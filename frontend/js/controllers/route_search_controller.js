@@ -6,6 +6,7 @@ export class RouteSearchController {
     this.statusPanel = statusPanel;
     this.api = api;
 
+    this.modeSelect = null;
     this.originInput = null;
     this.destinationInput = null;
     this.originSuggestions = null;
@@ -33,6 +34,7 @@ export class RouteSearchController {
   }
 
   _cacheElements() {
+    this.modeSelect = this.formEl.querySelector("#search-mode");
     this.originInput = this.formEl.querySelector("#search-origin-country");
     this.destinationInput = this.formEl.querySelector("#search-destination-country");
     this.originSuggestions = this.formEl.querySelector("#search-origin-suggestions");
@@ -81,6 +83,15 @@ export class RouteSearchController {
     fill(this.destinationSuggestions);
   }
 
+  _getModoLabel(modo) {
+    const labels = {
+      distancia: "Distancia mínima",
+      costo: "Costo mínimo",
+      tiempo: "Tiempo mínimo",
+    };
+    return labels[modo] || "Ruta";
+  }
+
   async _onSubmit(event) {
     event.preventDefault();
     this.statusPanel.clearErrors();
@@ -120,13 +131,16 @@ export class RouteSearchController {
     const inicioIds = uniqueIds(originNodes);
     const destinoIds = uniqueIds(destinationNodes);
 
+    const modo = (this.modeSelect ? this.modeSelect.value : "costo") || "costo";
+    const modoLabel = this._getModoLabel(modo);
+
     const payload = {
       graph: this.store.getGraph(),
       inicioId: inicioIds[0],
       destinoId: destinoIds[0],
       inicioIds,
       destinoIds,
-      modo: "costo",
+      modo: modo,
       presupuestoTotal: presupuestoTotal,
       opciones: {
         aeronaves,
@@ -144,7 +158,7 @@ export class RouteSearchController {
       }
 
       this.renderer.setRouteResult(result);
-      this.statusPanel.setStatus("Ruta por menor costo calculada.");
+      this.statusPanel.setStatus(`Ruta por ${modoLabel} calculada.`);
     } catch (error) {
       const messages =
         error && error.messages ? error.messages : [error.message || "Error."];

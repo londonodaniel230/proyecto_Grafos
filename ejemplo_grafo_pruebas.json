@@ -1,0 +1,233 @@
+{
+  "configuracion": {
+    "aeronaves": {
+      "A320": {
+        "costoKm": 5.5,
+        "tiempoKm": 0.0012
+      },
+      "B737": {
+        "costoKm": 4.8,
+        "tiempoKm": 0.0014
+      },
+      "A350": {
+        "costoKm": 6.2,
+        "tiempoKm": 0.001
+      }
+    },
+    "presupuestoMinimoPorc": 10,
+    "intervaloAlojamiento": 24,
+    "intervaloAlimentacion": 8
+  },
+  "nodos": [
+    {
+      "id": "BOG",
+      "nombre": "El Dorado",
+      "ciudad": "Bogotá",
+      "pais": "Colombia",
+      "zonaHoraria": "UTC-5",
+      "esHub": true,
+      "costoAlojamiento": 80,
+      "costoAlimentacion": 15,
+      "actividades": [],
+      "trabajos": [],
+      "lat": 4.7022,
+      "lon": -74.1469
+    },
+    {
+      "id": "MIA",
+      "nombre": "Miami International",
+      "ciudad": "Miami",
+      "pais": "Estados Unidos",
+      "zonaHoraria": "UTC-5",
+      "esHub": true,
+      "costoAlojamiento": 120,
+      "costoAlimentacion": 20,
+      "actividades": [],
+      "trabajos": [],
+      "lat": 25.7959,
+      "lon": -80.287
+    },
+    {
+      "id": "JFK",
+      "nombre": "John F. Kennedy",
+      "ciudad": "Nueva York",
+      "pais": "Estados Unidos",
+      "zonaHoraria": "UTC-5",
+      "esHub": true,
+      "costoAlojamiento": 150,
+      "costoAlimentacion": 25,
+      "actividades": [],
+      "trabajos": [],
+      "lat": 40.6413,
+      "lon": -73.7781
+    },
+    {
+      "id": "LAX",
+      "nombre": "Los Angeles",
+      "ciudad": "Los Angeles",
+      "pais": "Estados Unidos",
+      "zonaHoraria": "UTC-8",
+      "esHub": true,
+      "costoAlojamiento": 130,
+      "costoAlimentacion": 22,
+      "actividades": [],
+      "trabajos": [],
+      "lat": 33.9425,
+      "lon": -118.4081
+    },
+    {
+      "id": "SCL",
+      "nombre": "Arturo Merino Benítez",
+      "ciudad": "Santiago",
+      "pais": "Chile",
+      "zonaHoraria": "UTC-4",
+      "esHub": true,
+      "costoAlojamiento": 100,
+      "costoAlimentacion": 18,
+      "actividades": [],
+      "trabajos": [],
+      "lat": -33.3928,
+      "lon": -70.7942
+    },
+    {
+      "id": "LIM",
+      "nombre": "Jorge Chávez",
+      "ciudad": "Lima",
+      "pais": "Perú",
+      "zonaHoraria": "UTC-5",
+      "esHub": false,
+      "costoAlojamiento": 90,
+      "costoAlimentacion": 16,
+      "actividades": [],
+      "trabajos": [],
+      "lat": -12.0219,
+      "lon": -77.1085
+    },
+    {
+      "id": "MEX",
+      "nombre": "Benito Juárez",
+      "ciudad": "Ciudad de México",
+      "pais": "México",
+      "zonaHoraria": "UTC-6",
+      "esHub": true,
+      "costoAlojamiento": 95,
+      "costoAlimentacion": 17,
+      "actividades": [],
+      "trabajos": [],
+      "lat": 19.4326,
+      "lon": -99.0072
+    },
+    {
+      "id": "SFO",
+      "nombre": "San Francisco",
+      "ciudad": "San Francisco",
+      "pais": "Estados Unidos",
+      "zonaHoraria": "UTC-8",
+      "esHub": false,
+      "costoAlojamiento": 140,
+      "costoAlimentacion": 24,
+      "actividades": [],
+      "trabajos": [],
+      "lat": 37.6213,
+      "lon": -122.379
+    }
+  ],
+  "aristas": [
+    {
+      "origen": "BOG",
+      "destino": "MIA",
+      "distanciaKm": 1628,
+      "aeronaves": ["A320", "B737"],
+      "costoBase": 300,
+      "estanciaMinima": 2
+    },
+    {
+      "origen": "BOG",
+      "destino": "LIM",
+      "distanciaKm": 1210,
+      "aeronaves": ["A320", "A350"],
+      "costoBase": 250,
+      "estanciaMinima": 1.5
+    },
+    {
+      "origen": "MIA",
+      "destino": "JFK",
+      "distanciaKm": 1280,
+      "aeronaves": ["A320", "B737"],
+      "costoBase": 200,
+      "estanciaMinima": 1
+    },
+    {
+      "origen": "MIA",
+      "destino": "LAX",
+      "distanciaKm": 3790,
+      "aeronaves": ["A350", "B737"],
+      "costoBase": 400,
+      "estanciaMinima": 3
+    },
+    {
+      "origen": "MIA",
+      "destino": "MEX",
+      "distanciaKm": 1913,
+      "aeronaves": ["A320", "B737"],
+      "costoBase": 280,
+      "estanciaMinima": 2
+    },
+    {
+      "origen": "JFK",
+      "destino": "LAX",
+      "distanciaKm": 4488,
+      "aeronaves": ["A350"],
+      "costoBase": 450,
+      "estanciaMinima": 3.5
+    },
+    {
+      "origen": "JFK",
+      "destino": "SFO",
+      "distanciaKm": 4147,
+      "aeronaves": ["A350", "B737"],
+      "costoBase": 420,
+      "estanciaMinima": 3
+    },
+    {
+      "origen": "LAX",
+      "destino": "SFO",
+      "distanciaKm": 559,
+      "aeronaves": ["A320", "B737"],
+      "costoBase": 150,
+      "estanciaMinima": 0.5
+    },
+    {
+      "origen": "LIM",
+      "destino": "SCL",
+      "distanciaKm": 2246,
+      "aeronaves": ["A320", "B737"],
+      "costoBase": 280,
+      "estanciaMinima": 2
+    },
+    {
+      "origen": "LIM",
+      "destino": "MEX",
+      "distanciaKm": 3689,
+      "aeronaves": ["A350"],
+      "costoBase": 380,
+      "estanciaMinima": 2.5
+    },
+    {
+      "origen": "SCL",
+      "destino": "MIA",
+      "distanciaKm": 4790,
+      "aeronaves": ["A350"],
+      "costoBase": 500,
+      "estanciaMinima": 3.5
+    },
+    {
+      "origen": "MEX",
+      "destino": "LAX",
+      "distanciaKm": 2139,
+      "aeronaves": ["A320", "B737"],
+      "costoBase": 280,
+      "estanciaMinima": 2
+    }
+  ]
+}

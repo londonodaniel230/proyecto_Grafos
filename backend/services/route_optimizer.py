@@ -14,13 +14,14 @@ Modos soportados actualmente:
 from typing import Optional
 
 from ..models import Graph, RouteResult
-from .path_algorithms import CostOptions, dijkstra_por_costo, dijkstra_por_distancia
+from .path_algorithms import CostOptions, dijkstra_por_costo, dijkstra_por_distancia, dijkstra_por_tiempo
 
 
 # Registro de algoritmos disponibles por modo
 _ALGORITMOS = {
     "distancia": dijkstra_por_distancia,
     "costo": dijkstra_por_costo,
+    "tiempo": dijkstra_por_tiempo,
 }
 
 
@@ -43,8 +44,8 @@ def optimizar_ruta(
     inicio_id  : str    – ID del nodo origen.
     destino_id : str    – ID del nodo destino.
     modo       : str    – criterio de optimización.
-                         Valores aceptados: "distancia", "costo"
-                         (extensible: "tiempo", …).
+                         Valores aceptados: "distancia", "costo", "tiempo"
+                         (extensible: …).
     presupuesto_total : float | None – presupuesto maximo (USD) para el modo
                          "costo". Si es None, no se valida presupuesto.
     opciones  : CostOptions | None – opciones de costo (aeronaves, alimentacion,
@@ -79,6 +80,15 @@ def optimizar_ruta(
             inicio_id,
             destino_id,
             presupuesto_total=presupuesto_total,
+            opciones=opciones,
+            inicio_ids=inicio_ids,
+            destino_ids=destino_ids,
+        )
+    elif modo_normalizado == "tiempo":
+        return algoritmo(
+            graph,
+            inicio_id,
+            destino_id,
             opciones=opciones,
             inicio_ids=inicio_ids,
             destino_ids=destino_ids,

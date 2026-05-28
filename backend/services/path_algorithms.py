@@ -3,9 +3,10 @@
 path_algorithms.py  –  PERSONA 1 / DANIEL
 Algoritmos de búsqueda de rutas sobre el grafo de viajes.
 
-Algoritmo implementado:
+Algoritmos implementados:
     - dijkstra_por_distancia : ruta óptima usando distancia_km como peso.
     - dijkstra_por_costo     : ruta optima usando costo como peso.
+    - dijkstra_por_tiempo    : ruta optima usando tiempo como peso.
 """
 
 import math
@@ -523,4 +524,234 @@ def dijkstra_por_costo(
         encontrado=True,
         error=None,
         total_costo=costo_acum,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Dijkstra por tiempo (responsabilidad PERSONA 1)
+# ---------------------------------------------------------------------------
+
+def _seleccionar_aeronave_mas_rapida(
+    aeronaves: List[str],
+    config: Optional["object"],
+    aeronaves_permitidas: Optional[Set[str]] = None,
+) -> Tuple[str, Optional[float]]:
+    """
+    Selecciona la aeronave más rápida (menor tiempo_km) de la lista.
+    Si hay múltiples opciones, elige la más rápida según la configuración.
+    """
+    if not aeronaves:
+        return ("desconocida", None)
+
+    candidatas = _filtrar_aeronaves(aeronaves, aeronaves_permitidas)
+    if not candidatas:
+        return ("", None)
+
+    if config is None or not getattr(config, "aeronaves", None):
+        return (candidatas[0], None)
+
+    tiempos: List[Tuple[str, float]] = []
+    aeronaves_cfg = getattr(config, "aeronaves", {})
+    aeronaves_cfg_ci = {key.lower(): value for key, value in aeronaves_cfg.items()}
+    for aeronave in candidatas:
+        config_entry = aeronaves_cfg.get(aeronave)
+        if config_entry is None:
+            config_entry = aeronaves_cfg_ci.get(aeronave.lower())
+        if config_entry is None:
+            continue
+        tiempos.append((aeronave, float(config_entry.tiempo_km)))
+
+    if not tiempos:
+        return (candidatas[0], None)
+
+    return min(tiempos, key=lambda item: item[1])
+
+
+def _build_adjacency_por_tiempo(
+    graph: Graph,
+    opciones: Optional[CostOptions] = None,
+) -> Dict[str, List[Tuple[str, float, float, str]]]:
+    """
+    Construye un mapa de adyacencia con pesos por tiempo.
+
+    Retorna:
+        {
+            origen_id: [(destino_id, tiempo_total, distancia_km, aeronave), ...]
+        }
+    """
+    adj: Dict[str, List[Tuple[str, float, float, str]]] = {
+        nodo.id: [] for nodo in graph.nodos
+    }
+
+    config = graph.configuracion
+    opciones = opciones or CostOptions()
+    permitidas = opciones.aeronaves_permitidas
+
+    for arista in graph.aristas:
+        aeronave, tiempo_km = _seleccionar_aeronave_mas_rapida(
+            arista.aeronaves, config, permitidas
+        )
+        if not aeronave:
+            continue
+        # Tiempo total = tiempo de vuelo + estancia mínima
+        tiempo_vuelo = arista.distancia_km * (tiempo_km or 0.0)
+        tiempo_total = tiempo_vuelo + arista.estancia_minima
+
+        if arista.origen in adj:
+            adj[arista.origen].append(
+                (arista.destino, tiempo_total, arista.distancia_km, aeronave)
+            )
+
+    return adj
+
+
+def dijkstra_por_tiempo(
+    graph: Graph,
+    inicio_id: str,
+    destino_id: str,
+    opciones: Optional[CostOptions] = None,
+    inicio_ids: Optional[List[str]] = None,
+    destino_ids: Optional[List[str]] = None,
+) -> "RouteResult":
+    """
+    Calcula la ruta de menor tiempo (horas) entre dos nodos usando Dijkstra.
+
+    El tiempo considera:
+        - distancia_km * tiempo_km segun la aeronave mas rapida disponible.
+        - estancia_minima del tramo.
+
+    Parámetros
+    ----------
+    graph       : Graph  – grafo cargado con nodos y aristas.
+    inicio_id   : str    – identificador del nodo origen.
+    destino_id  : str    – identificador del nodo destino.
+    opciones    : CostOptions | None – opciones de filtrado (aeronaves).
+    inicio_ids  : list | None – lista de IDs de origen (opcional).
+    destino_ids : list | None – lista de IDs de destino (opcional).
+
+    Retorna
+    -------
+    RouteResult con:
+        - camino   : lista de IDs en orden de visita.
+        - pasos    : lista de RouteStep con detalle de cada tramo.
+        - total_km : distancia acumulada total.
+        - encontrado : True si existe ruta, False si no.
+    """
+    # ------------------------------------------------------------------ setup
+    todos_ids = [nodo.id for nodo in graph.nodos]
+    inicio_ids = [item for item in (inicio_ids or []) if item]
+    destino_ids = [item for item in (destino_ids or []) if item]
+
+    if not inicio_ids:
+        inicio_ids = [inicio_id]
+    if not destino_ids:
+        destino_ids = [destino_id]
+
+    inicio_set = set(inicio_ids)
+    destino_set = set(destino_ids)
+
+    faltantes_inicio = [item for item in inicio_set if item not in todos_ids]
+    if faltantes_inicio:
+        return RouteResult(
+            camino=[],
+            pasos=[],
+            total_km=math.inf,
+            encontrado=False,
+            error=(
+                "Nodos origen no existen en el grafo: "
+                + ", ".join(sorted(faltantes_inicio))
+            ),
+        )
+    faltantes_destino = [item for item in destino_set if item not in todos_ids]
+    if faltantes_destino:
+        return RouteResult(
+            camino=[],
+            pasos=[],
+            total_km=math.inf,
+            encontrado=False,
+            error=(
+                "Nodos destino no existen en el grafo: "
+                + ", ".join(sorted(faltantes_destino))
+            ),
+        )
+
+    adj = _build_adjacency_por_tiempo(graph, opciones)
+
+    # Tablas de Dijkstra (tiempos)
+    dist: Dict[str, float] = {v: math.inf for v in todos_ids}
+    pred: Dict[str, Optional[str]] = {v: None for v in todos_ids}
+    pred_aeronave: Dict[str, Optional[str]] = {v: None for v in todos_ids}
+    for inicio in inicio_set:
+        dist[inicio] = 0.0
+
+    no_visitados: set = set(todos_ids)
+
+    # --------------------------------------------------------------- iteracion
+    destino_encontrado: Optional[str] = None
+    while no_visitados:
+        u = min(no_visitados, key=lambda v: dist[v])
+
+        if dist[u] == math.inf:
+            break
+
+        no_visitados.remove(u)
+
+        if u in destino_set:
+            destino_encontrado = u
+            break
+
+        for (vecino, tiempo_tramo, _, aeronave) in adj.get(u, []):
+            if vecino not in no_visitados:
+                continue
+            nueva_dist = dist[u] + tiempo_tramo
+            if nueva_dist < dist[vecino]:
+                dist[vecino] = nueva_dist
+                pred[vecino] = u
+                pred_aeronave[vecino] = aeronave
+
+    if destino_encontrado is None or dist[destino_encontrado] == math.inf:
+        return RouteResult(
+            camino=[],
+            pasos=[],
+            total_km=math.inf,
+            encontrado=False,
+            error="No existe ruta entre los nodos seleccionados.",
+        )
+
+    camino = _reconstruir_camino_multi(pred, inicio_set, destino_encontrado)
+
+    pasos: List[RouteStep] = []
+    distancia_acum = 0.0
+    for i in range(len(camino) - 1):
+        origen = camino[i]
+        destino = camino[i + 1]
+
+        tramo = next(
+            (item for item in adj.get(origen, []) if item[0] == destino),
+            None,
+        )
+        if tramo is None:
+            tramo_km = 0.0
+            aeronave = pred_aeronave.get(destino)
+        else:
+            _, _, tramo_km, aeronave = tramo
+
+        distancia_acum += tramo_km
+        pasos.append(
+            RouteStep(
+                origen=origen,
+                destino=destino,
+                distancia_km=tramo_km,
+                distancia_acumulada_km=distancia_acum,
+                aeronave=aeronave,
+            )
+        )
+
+    return RouteResult(
+        camino=camino,
+        pasos=pasos,
+        total_km=distancia_acum,
+        encontrado=True,
+        error=None,
+        total_costo=dist[destino_encontrado],  # Reutilizamos para guardar el tiempo total
     )
