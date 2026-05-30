@@ -25,7 +25,7 @@ _ALGORITMOS = {
 
 
 def optimizar_ruta(
-    graph: Graph,
+    graph: Graph,  
     inicio_id: str,
     destino_id: str,
     modo: str = "distancia",
