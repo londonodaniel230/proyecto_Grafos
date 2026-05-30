@@ -52,8 +52,16 @@
           </div>
         </div>
         <div class="panel-block">
-          <h2>Buscar ruta (menor costo)</h2>
+          <h2>Buscar ruta (Dijkstra)</h2>
           <form id="search-form" class="route-form">
+            <div class="field">
+              <label for="search-mode">Modo de búsqueda</label>
+              <select id="search-mode">
+                <option value="distancia">Distancia mínima</option>
+                <option value="costo" selected>Costo mínimo (precio)</option>
+                <option value="tiempo">Tiempo mínimo</option>
+              </select>
+            </div>
             <div class="field">
               <label for="search-origin-country">Pais origen</label>
               <input id="search-origin-country" type="text" list="search-origin-suggestions"
@@ -81,7 +89,7 @@
               <label><input id="search-food" type="checkbox" checked /> Incluir alimentacion</label>
               <label><input id="search-work" type="checkbox" checked /> Incluir trabajos</label>
             </div>
-            <button class="primary" type="submit">Buscar menor costo</button>
+            <button class="primary" type="submit">Buscar ruta</button>
           </form>
         </div>
         <div class="panel-block">
