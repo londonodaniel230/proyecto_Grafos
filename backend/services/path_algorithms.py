@@ -7,6 +7,7 @@ Algoritmos implementados:
     - dijkstra_por_distancia : ruta óptima usando distancia_km como peso.
     - dijkstra_por_costo     : ruta optima usando costo como peso.
     - dijkstra_por_tiempo    : ruta optima usando tiempo como peso.
+    - dfs_mayor_destinos     : ruta con mas destinos con restricciones.
 """
 
 import math
@@ -22,6 +23,13 @@ class CostOptions:
     incluir_alojamiento: bool = True
     incluir_alimentacion: bool = True
     incluir_trabajo: bool = True
+
+
+@dataclass(frozen=True)
+class TraversalConstraints:
+    presupuesto_total: Optional[float] = None
+    tiempo_maximo: Optional[float] = None
+    excluir_secundarios: bool = False
 
 
 # ---------------------------------------------------------------------------
@@ -239,6 +247,104 @@ def _presupuesto_disponible(
         porcentaje = float(getattr(config, "presupuesto_minimo_porc", 0.0) or 0.0)
     reserva = presupuesto_total * (porcentaje / 100.0)
     return max(presupuesto_total - reserva, 0.0)
+
+
+def _nodos_permitidos(
+    graph: Graph,
+    excluir_secundarios: bool,
+    inicio_set: Set[str],
+    destino_set: Set[str],
+) -> Set[str]:
+    if not excluir_secundarios:
+        return {nodo.id for nodo in graph.nodos}
+
+    permitidos = {nodo.id for nodo in graph.nodos if nodo.es_hub}
+    permitidos.update(inicio_set)
+    permitidos.update(destino_set)
+    return permitidos
+
+
+def _build_adjacency_con_pesos(
+    graph: Graph,
+    opciones: Optional[CostOptions],
+    nodos_permitidos: Set[str],
+) -> Dict[str, List[Tuple[str, float, float, float, str]]]:
+    """
+    Construye un mapa de adyacencia con costo y tiempo por aeronave.
+
+    Retorna:
+        {
+            origen_id: [(destino_id, costo_total, tiempo_total, distancia_km, aeronave), ...]
+        }
+    """
+    adj: Dict[str, List[Tuple[str, float, float, float, str]]] = {
+        nodo_id: [] for nodo_id in nodos_permitidos
+    }
+
+    opciones = opciones or CostOptions()
+    config = graph.configuracion
+    nodo_por_id = {nodo.id: nodo for nodo in graph.nodos}
+    permitidas = opciones.aeronaves_permitidas
+
+    aeronaves_cfg = getattr(config, "aeronaves", {}) if config else {}
+    aeronaves_cfg_ci = {key.lower(): value for key, value in aeronaves_cfg.items()}
+
+    for arista in graph.aristas:
+        if arista.origen not in nodos_permitidos or arista.destino not in nodos_permitidos:
+            continue
+
+        destino = nodo_por_id.get(arista.destino)
+        aeronaves = arista.aeronaves or ["desconocida"]
+
+        for aeronave in aeronaves:
+            if permitidas and aeronave.strip().lower() not in permitidas:
+                continue
+
+            config_entry = aeronaves_cfg.get(aeronave)
+            if config_entry is None:
+                config_entry = aeronaves_cfg_ci.get(aeronave.lower())
+
+            costo_km = float(getattr(config_entry, "costo_km", 0.0) or 0.0)
+            tiempo_km = float(getattr(config_entry, "tiempo_km", 0.0) or 0.0)
+
+            costo_distancia = arista.distancia_km * costo_km
+            costo_estancia = _calcular_costo_estancia(
+                destino,
+                arista.estancia_minima,
+                config,
+                incluir_alojamiento=opciones.incluir_alojamiento,
+                incluir_alimentacion=opciones.incluir_alimentacion,
+            )
+            credito_trabajo = _credito_trabajo(destino, opciones.incluir_trabajo)
+            costo_total = float(arista.costo_base) + costo_distancia + costo_estancia
+            costo_total = max(costo_total - credito_trabajo, 0.0)
+
+            tiempo_total = arista.distancia_km * tiempo_km + arista.estancia_minima
+
+            adj[arista.origen].append(
+                (
+                    arista.destino,
+                    costo_total,
+                    tiempo_total,
+                    arista.distancia_km,
+                    aeronave,
+                )
+            )
+
+    return adj
+
+
+def _cumple_restricciones(
+    costo_total: float,
+    tiempo_total: float,
+    presupuesto_max: Optional[float],
+    tiempo_maximo: Optional[float],
+) -> bool:
+    if presupuesto_max is not None and costo_total > presupuesto_max:
+        return False
+    if tiempo_maximo is not None and tiempo_total > tiempo_maximo:
+        return False
+    return True
 
 
 # ---------------------------------------------------------------------------
@@ -754,4 +860,214 @@ def dijkstra_por_tiempo(
         encontrado=True,
         error=None,
         total_costo=dist[destino_encontrado],  # Reutilizamos para guardar el tiempo total
+    )
+
+
+# ---------------------------------------------------------------------------
+# DFS mayor cantidad de destinos (con restricciones)
+# ---------------------------------------------------------------------------
+
+def dfs_mayor_destinos(
+    graph: Graph,
+    inicio_id: str,
+    destino_id: str,
+    opciones: Optional[CostOptions] = None,
+    restricciones: Optional[TraversalConstraints] = None,
+    inicio_ids: Optional[List[str]] = None,
+    destino_ids: Optional[List[str]] = None,
+) -> "RouteResult":
+    """
+    Encuentra una ruta con la mayor cantidad de destinos respetando restricciones.
+
+    Reglas:
+        - Si existe ruta directa valida, se retorna esa ruta.
+        - Si no, se exploran rutas con DFS sin repetir nodos.
+
+    Restricciones soportadas:
+        - presupuesto_total
+        - tiempo_maximo
+        - excluir_secundarios
+        - aeronaves_permitidas (desde opciones)
+    """
+    restricciones = restricciones or TraversalConstraints()
+    opciones = opciones or CostOptions()
+
+    todos_ids = [nodo.id for nodo in graph.nodos]
+    inicio_ids = [item for item in (inicio_ids or []) if item]
+    destino_ids = [item for item in (destino_ids or []) if item]
+
+    if not inicio_ids:
+        inicio_ids = [inicio_id]
+    if not destino_ids:
+        destino_ids = [destino_id]
+
+    inicio_set = set(inicio_ids)
+    destino_set = set(destino_ids)
+
+    faltantes_inicio = [item for item in inicio_set if item not in todos_ids]
+    if faltantes_inicio:
+        return RouteResult(
+            camino=[],
+            pasos=[],
+            total_km=math.inf,
+            encontrado=False,
+            error=(
+                "Nodos origen no existen en el grafo: "
+                + ", ".join(sorted(faltantes_inicio))
+            ),
+        )
+
+    faltantes_destino = [item for item in destino_set if item not in todos_ids]
+    if faltantes_destino:
+        return RouteResult(
+            camino=[],
+            pasos=[],
+            total_km=math.inf,
+            encontrado=False,
+            error=(
+                "Nodos destino no existen en el grafo: "
+                + ", ".join(sorted(faltantes_destino))
+            ),
+        )
+
+    nodos_permitidos = _nodos_permitidos(
+        graph,
+        restricciones.excluir_secundarios,
+        inicio_set,
+        destino_set,
+    )
+
+    adj = _build_adjacency_con_pesos(graph, opciones, nodos_permitidos)
+
+    presupuesto_max = _presupuesto_disponible(
+        restricciones.presupuesto_total,
+        graph.configuracion,
+    )
+    tiempo_maximo = restricciones.tiempo_maximo
+
+    mejor_camino: List[str] = []
+    mejor_aristas: List[Tuple[str, float, float, float, str]] = []
+    mejor_costo = math.inf
+    mejor_tiempo = math.inf
+    mejor_km = 0.0
+
+    # Ruta directa si existe y cumple restricciones
+    mejor_directa = None
+    for inicio in inicio_set:
+        for edge in adj.get(inicio, []):
+            destino, costo, tiempo, distancia_km, aeronave = edge
+            if destino not in destino_set:
+                continue
+            if not _cumple_restricciones(costo, tiempo, presupuesto_max, tiempo_maximo):
+                continue
+            if mejor_directa is None or costo < mejor_directa[1]:
+                mejor_directa = (destino, costo, tiempo, distancia_km, aeronave, inicio)
+
+    if mejor_directa is not None:
+        destino, costo, _, distancia_km, aeronave, inicio = mejor_directa
+        pasos = [
+            RouteStep(
+                origen=inicio,
+                destino=destino,
+                distancia_km=distancia_km,
+                distancia_acumulada_km=distancia_km,
+                aeronave=aeronave,
+            )
+        ]
+        return RouteResult(
+            camino=[inicio, destino],
+            pasos=pasos,
+            total_km=distancia_km,
+            encontrado=True,
+            error=None,
+            total_costo=costo,
+        )
+
+    # DFS para maximizar destinos
+    stack: List[Tuple[str, List[str], List[Tuple[str, float, float, float, str]], Set[str], float, float, float]] = []
+    for inicio in inicio_set:
+        if inicio in nodos_permitidos:
+            stack.append((inicio, [inicio], [], {inicio}, 0.0, 0.0, 0.0))
+
+    while stack:
+        actual, camino, aristas_camino, visitados, costo_acum, tiempo_acum, km_acum = stack.pop()
+
+        if actual in destino_set:
+            es_mejor = False
+            if len(camino) > len(mejor_camino):
+                es_mejor = True
+            elif len(camino) == len(mejor_camino):
+                if costo_acum < mejor_costo:
+                    es_mejor = True
+                elif costo_acum == mejor_costo and tiempo_acum < mejor_tiempo:
+                    es_mejor = True
+
+            if es_mejor:
+                mejor_camino = list(camino)
+                mejor_aristas = list(aristas_camino)
+                mejor_costo = costo_acum
+                mejor_tiempo = tiempo_acum
+                mejor_km = km_acum
+
+        for edge in adj.get(actual, []):
+            vecino, costo, tiempo, distancia_km, _ = edge
+            if vecino in visitados:
+                continue
+
+            nuevo_costo = costo_acum + costo
+            nuevo_tiempo = tiempo_acum + tiempo
+            if not _cumple_restricciones(
+                nuevo_costo,
+                nuevo_tiempo,
+                presupuesto_max,
+                tiempo_maximo,
+            ):
+                continue
+
+            nuevo_visitados = set(visitados)
+            nuevo_visitados.add(vecino)
+            stack.append(
+                (
+                    vecino,
+                    camino + [vecino],
+                    aristas_camino + [edge],
+                    nuevo_visitados,
+                    nuevo_costo,
+                    nuevo_tiempo,
+                    km_acum + distancia_km,
+                )
+            )
+
+    if not mejor_camino:
+        return RouteResult(
+            camino=[],
+            pasos=[],
+            total_km=math.inf,
+            encontrado=False,
+            error="No existe ruta que cumpla las restricciones.",
+        )
+
+    pasos: List[RouteStep] = []
+    distancia_acum = 0.0
+    for index, edge in enumerate(mejor_aristas):
+        destino, _, _, distancia_km, aeronave = edge
+        origen = mejor_camino[index]
+        distancia_acum += distancia_km
+        pasos.append(
+            RouteStep(
+                origen=origen,
+                destino=destino,
+                distancia_km=distancia_km,
+                distancia_acumulada_km=distancia_acum,
+                aeronave=aeronave,
+            )
+        )
+
+    return RouteResult(
+        camino=mejor_camino,
+        pasos=pasos,
+        total_km=mejor_km,
+        encontrado=True,
+        error=None,
+        total_costo=mejor_costo,
     )

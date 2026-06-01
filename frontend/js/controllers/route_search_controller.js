@@ -13,6 +13,8 @@ export class RouteSearchController {
     this.destinationSuggestions = null;
     this.budgetInput = null;
     this.aircraftInput = null;
+    this.timeInput = null;
+    this.secondarySelect = null;
     this.lodgingInput = null;
     this.foodInput = null;
     this.workInput = null;
@@ -43,6 +45,8 @@ export class RouteSearchController {
     );
     this.budgetInput = this.formEl.querySelector("#search-budget");
     this.aircraftInput = this.formEl.querySelector("#search-aircraft");
+    this.timeInput = this.formEl.querySelector("#search-time");
+    this.secondarySelect = this.formEl.querySelector("#search-secondary");
     this.lodgingInput = this.formEl.querySelector("#search-lodging");
     this.foodInput = this.formEl.querySelector("#search-food");
     this.workInput = this.formEl.querySelector("#search-work");
@@ -88,6 +92,7 @@ export class RouteSearchController {
       distancia: "Distancia mínima",
       costo: "Costo mínimo",
       tiempo: "Tiempo mínimo",
+      destinos: "Mayor cantidad de destinos",
     };
     return labels[modo] || "Ruta";
   }
@@ -95,6 +100,7 @@ export class RouteSearchController {
   async _onSubmit(event) {
     event.preventDefault();
     this.statusPanel.clearErrors();
+    this.renderer.setRouteResult({ encontrado: false });
 
     if (!this.store.hasGraph()) {
       this.statusPanel.showErrors(["Debes cargar un grafo primero."]);
@@ -128,6 +134,16 @@ export class RouteSearchController {
       this.aircraftInput ? this.aircraftInput.value : ""
     );
 
+    const timeRaw = this.timeInput ? this.timeInput.value : "";
+    const tiempoMaximo = timeRaw ? Number(timeRaw) : null;
+    if (timeRaw && !Number.isFinite(tiempoMaximo)) {
+      this.statusPanel.showErrors(["Tiempo maximo invalido."]);
+      return;
+    }
+
+    const excluirSecundarios =
+      this.secondarySelect ? this.secondarySelect.value === "true" : false;
+
     const inicioIds = uniqueIds(originNodes);
     const destinoIds = uniqueIds(destinationNodes);
 
@@ -142,6 +158,8 @@ export class RouteSearchController {
       destinoIds,
       modo: modo,
       presupuestoTotal: presupuestoTotal,
+      tiempoMaximo: tiempoMaximo,
+      excluirSecundarios: excluirSecundarios,
       opciones: {
         aeronaves,
         incluirAlojamiento: this.lodgingInput ? this.lodgingInput.checked : true,
@@ -157,7 +175,10 @@ export class RouteSearchController {
         return;
       }
 
-      this.renderer.setRouteResult(result);
+      this.renderer.setRouteResult(result, {
+        label: `Ruta por ${modoLabel}`,
+        showDestinos: modo === "destinos",
+      });
       this.statusPanel.setStatus(`Ruta por ${modoLabel} calculada.`);
     } catch (error) {
       const messages =

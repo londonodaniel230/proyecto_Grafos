@@ -14,7 +14,14 @@ Modos soportados actualmente:
 from typing import Optional
 
 from ..models import Graph, RouteResult
-from .path_algorithms import CostOptions, dijkstra_por_costo, dijkstra_por_distancia, dijkstra_por_tiempo
+from .path_algorithms import (
+    CostOptions,
+    TraversalConstraints,
+    dfs_mayor_destinos,
+    dijkstra_por_costo,
+    dijkstra_por_distancia,
+    dijkstra_por_tiempo,
+)
 
 
 # Registro de algoritmos disponibles por modo
@@ -22,6 +29,7 @@ _ALGORITMOS = {
     "distancia": dijkstra_por_distancia,
     "costo": dijkstra_por_costo,
     "tiempo": dijkstra_por_tiempo,
+    "destinos": dfs_mayor_destinos,
 }
 
 
@@ -34,6 +42,7 @@ def optimizar_ruta(
     opciones: Optional[CostOptions] = None,
     inicio_ids: Optional[list] = None,
     destino_ids: Optional[list] = None,
+    restricciones: Optional[TraversalConstraints] = None,
 ) -> RouteResult:
     """
     Calcula la ruta óptima entre dos nodos según el modo indicado.
@@ -52,6 +61,8 @@ def optimizar_ruta(
                 alojamiento, trabajo).
     inicio_ids : list | None – lista de IDs de origen (opcional).
     destino_ids: list | None – lista de IDs de destino (opcional).
+    restricciones: TraversalConstraints | None – restricciones para busquedas
+                   no optimas (presupuesto/tiempo/excluir secundarios).
 
     Retorna
     -------
@@ -90,6 +101,16 @@ def optimizar_ruta(
             inicio_id,
             destino_id,
             opciones=opciones,
+            inicio_ids=inicio_ids,
+            destino_ids=destino_ids,
+        )
+    elif modo_normalizado == "destinos":
+        return algoritmo(
+            graph,
+            inicio_id,
+            destino_id,
+            opciones=opciones,
+            restricciones=restricciones,
             inicio_ids=inicio_ids,
             destino_ids=destino_ids,
         )

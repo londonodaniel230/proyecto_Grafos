@@ -3,7 +3,7 @@ from flask import Blueprint, jsonify, request
 from .errors import ValidationError
 from .services.geocoding import geocode_country
 from .services.graph_loader import GraphLoader
-from .services.path_algorithms import CostOptions
+from .services.path_algorithms import CostOptions, TraversalConstraints
 from .services.route_optimizer import optimizar_ruta
 
 api_bp = Blueprint("api", __name__, url_prefix="/api")
@@ -70,6 +70,12 @@ def optimize_route():
         if presupuesto_total is not None:
             presupuesto_total = float(presupuesto_total)
 
+        tiempo_maximo = payload.get("tiempoMaximo")
+        if tiempo_maximo is not None:
+            tiempo_maximo = float(tiempo_maximo)
+
+        excluir_secundarios = bool(payload.get("excluirSecundarios", False))
+
         opciones_raw = payload.get("opciones") or {}
         aeronaves_raw = opciones_raw.get("aeronaves") or []
         aeronaves = None
@@ -83,6 +89,12 @@ def optimize_route():
             incluir_trabajo=bool(opciones_raw.get("incluirTrabajo", True)),
         )
 
+        restricciones = TraversalConstraints(
+            presupuesto_total=presupuesto_total,
+            tiempo_maximo=tiempo_maximo,
+            excluir_secundarios=excluir_secundarios,
+        )
+
         resultado = optimizar_ruta(
             graph,
             inicio_id,
@@ -92,6 +104,7 @@ def optimize_route():
             opciones=opciones,
             inicio_ids=inicio_ids,
             destino_ids=destino_ids,
+            restricciones=restricciones,
         )
         return jsonify(resultado.to_dict())
     except ValidationError as exc:

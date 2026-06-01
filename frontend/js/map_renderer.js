@@ -37,13 +37,16 @@ export class MapRenderer {
     this._setDetailsLines(["Sin datos cargados."]);
   }
 
-  setRouteResult(routeResult) {
+  setRouteResult(routeResult, options = {}) {
     this.routeResult = routeResult;
     this._clearRoute();
 
     if (!this.graph || !routeResult || !routeResult.encontrado) {
       return;
     }
+
+    const label = options.label || "Ruta";
+    const showDestinos = Boolean(options.showDestinos);
 
     const nodeById = new Map(
       this.graph.nodos.map((node) => [node.id, node])
@@ -72,9 +75,14 @@ export class MapRenderer {
       typeof routeResult.totalCosto === "number" ? routeResult.totalCosto : null;
     const camino = (routeResult.camino || []).join(" -> ");
     const lines = [
-      "Ruta por menor costo:",
+      `${label}:`,
       camino || "(sin ruta)",
     ];
+
+    if (showDestinos) {
+      const destinosCount = Math.max((routeResult.camino || []).length - 1, 0);
+      lines.push(`Destinos visitados: ${destinosCount}`);
+    }
 
     if (totalKm !== null) {
       lines.push(`Distancia total: ${totalKm.toFixed(2)} km`);
