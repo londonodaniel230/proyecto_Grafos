@@ -29,195 +29,6 @@
     </header>
 
     <main class="content">
-      <aside class="panel">
-        <div class="panel-block">
-          <h2>Estado</h2>
-          <div id="status" class="status">Sin datos cargados.</div>
-        </div>
-        <div class="panel-block">
-          <h2>Errores</h2>
-          <ul id="errors" class="errors"></ul>
-        </div>
-        <div class="panel-block">
-          <h2>Resumen</h2>
-          <div id="stats" class="stats">
-            <div>Nodos: 0</div>
-            <div>Aristas: 0</div>
-          </div>
-        </div>
-        <div class="panel-block">
-          <h2>Detalle de nodo</h2>
-          <div id="details" class="details">
-            Selecciona un nodo en el grafo para ver detalles.
-          </div>
-        </div>
-        <div class="panel-block">
-          <h2>Buscar ruta (Dijkstra)</h2>
-          <form id="search-form" class="route-form">
-            <div class="field">
-              <label for="search-mode">Modo de búsqueda</label>
-              <select id="search-mode">
-                <option value="distancia">Distancia mínima</option>
-                <option value="costo" selected>Costo mínimo (precio)</option>
-                <option value="tiempo">Tiempo mínimo</option>
-                <option value="destinos">Mayor cantidad de destinos</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="search-origin-country">Pais origen</label>
-              <input id="search-origin-country" type="text" list="search-origin-suggestions"
-                placeholder="Ej: Colombia" autocomplete="off" />
-              <datalist id="search-origin-suggestions"></datalist>
-            </div>
-            <div class="field">
-              <label for="search-destination-country">Pais destino</label>
-              <input id="search-destination-country" type="text" list="search-destination-suggestions"
-                placeholder="Ej: Peru" autocomplete="off" />
-              <datalist id="search-destination-suggestions"></datalist>
-            </div>
-            <div class="field-grid">
-              <div class="field">
-                <label for="search-budget">Presupuesto total (USD)</label>
-                <input id="search-budget" type="number" step="0.01" min="0" />
-              </div>
-              <div class="field">
-                <label for="search-aircraft">Aeronaves permitidas (coma)</label>
-                <input id="search-aircraft" type="text" placeholder="A320, B737" />
-              </div>
-            </div>
-            <div class="field-grid">
-              <div class="field">
-                <label for="search-time">Tiempo maximo (min)</label>
-                <input id="search-time" type="number" step="1" min="0" />
-              </div>
-              <div class="field">
-                <label for="search-secondary">Excluir secundarios</label>
-                <select id="search-secondary">
-                  <option value="false" selected>Permitir</option>
-                  <option value="true">Excluir</option>
-                </select>
-              </div>
-            </div>
-            <div class="checkbox-row">
-              <label><input id="search-lodging" type="checkbox" checked /> Incluir alojamiento</label>
-              <label><input id="search-food" type="checkbox" checked /> Incluir alimentacion</label>
-              <label><input id="search-work" type="checkbox" checked /> Incluir trabajos</label>
-            </div>
-            <button class="primary" type="submit">Buscar ruta</button>
-          </form>
-        </div>
-        <div class="panel-block">
-          <h2>Agregar ruta</h2>
-          <form id="route-form" class="route-form">
-            <div class="field">
-              <label for="origin-country">Pais origen</label>
-              <input id="origin-country" type="text" list="origin-suggestions" placeholder="Ej: Colombia"
-                autocomplete="off" />
-              <datalist id="origin-suggestions"></datalist>
-            </div>
-            <div class="field">
-              <label for="destination-country">Pais destino</label>
-              <input id="destination-country" type="text" list="destination-suggestions" placeholder="Ej: Peru"
-                autocomplete="off" />
-              <datalist id="destination-suggestions"></datalist>
-            </div>
-
-            <div class="field-grid">
-              <div class="field">
-                <label for="route-distance">Distancia (km)</label>
-                <input id="route-distance" type="number" step="1" min="1" placeholder="Auto" readonly />
-              </div>
-              <div class="field">
-                <label for="route-cost">Costo base (USD)</label>
-                <input id="route-cost" type="number" step="0.01" min="0" />
-              </div>
-            </div>
-            <div class="field-grid">
-              <div class="field">
-                <label for="route-stay">Estancia minima (min)</label>
-                <input id="route-stay" type="number" step="1" min="0" />
-              </div>
-              <div class="field">
-                <label for="route-aircraft">Aeronaves (coma)</label>
-                <input id="route-aircraft" type="text" placeholder="A320, B737" />
-              </div>
-            </div>
-
-            <details id="origin-node-section" class="node-section">
-              <summary>Datos pais origen (si no existe)</summary>
-              <div class="node-grid">
-                <div class="field">
-                  <label for="origin-hub">Tipo</label>
-                  <select id="origin-hub">
-                    <option value="true">Hub</option>
-                    <option value="false">Secundario</option>
-                  </select>
-                </div>
-                <div class="field">
-                  <label for="origin-lodging">Costo alojamiento</label>
-                  <input id="origin-lodging" type="number" step="0.01" min="0" />
-                </div>
-              </div>
-              <div class="list-block">
-                <div class="list-header">
-                  <span>Actividades</span>
-                  <button type="button" class="ghost" data-add-activity="origin">
-                    Agregar actividad
-                  </button>
-                </div>
-                <div id="origin-activities" class="list-container"></div>
-              </div>
-              <div class="list-block">
-                <div class="list-header">
-                  <span>Trabajos</span>
-                  <button type="button" class="ghost" data-add-job="origin">
-                    Agregar trabajo
-                  </button>
-                </div>
-                <div id="origin-jobs" class="list-container"></div>
-              </div>
-            </details>
-
-            <details id="destination-node-section" class="node-section">
-              <summary>Datos pais destino (si no existe)</summary>
-              <div class="node-grid">
-                <div class="field">
-                  <label for="destination-hub">Tipo</label>
-                  <select id="destination-hub">
-                    <option value="true">Hub</option>
-                    <option value="false">Secundario</option>
-                  </select>
-                </div>
-                <div class="field">
-                  <label for="destination-lodging">Costo alojamiento</label>
-                  <input id="destination-lodging" type="number" step="0.01" min="0" />
-                </div>
-              </div>
-              <div class="list-block">
-                <div class="list-header">
-                  <span>Actividades</span>
-                  <button type="button" class="ghost" data-add-activity="destination">
-                    Agregar actividad
-                  </button>
-                </div>
-                <div id="destination-activities" class="list-container"></div>
-              </div>
-              <div class="list-block">
-                <div class="list-header">
-                  <span>Trabajos</span>
-                  <button type="button" class="ghost" data-add-job="destination">
-                    Agregar trabajo
-                  </button>
-                </div>
-                <div id="destination-jobs" class="list-container"></div>
-              </div>
-            </details>
-
-            <button class="primary" type="submit">Agregar ruta</button>
-          </form>
-        </div>
-      </aside>
-
       <section class="canvas-card">
         <div class="canvas-header">
           <h2>Mapa del grafo</h2>
@@ -230,6 +41,221 @@
           <div id="map"></div>
         </div>
       </section>
+
+      <aside class="panel">
+        <div class="panel-grid">
+          <div class="panel-block">
+            <h2>Estado</h2>
+            <div id="status" class="status">Sin datos cargados.</div>
+          </div>
+          <div class="panel-block">
+            <h2>Errores</h2>
+            <ul id="errors" class="errors"></ul>
+          </div>
+          <div class="panel-block">
+            <h2>Resumen</h2>
+            <div id="stats" class="stats">
+              <div>Nodos: 0</div>
+              <div>Aristas: 0</div>
+            </div>
+          </div>
+          <div class="panel-block">
+            <h2>Detalle de nodo</h2>
+            <div id="details" class="details">
+              Selecciona un nodo en el grafo para ver detalles.
+            </div>
+          </div>
+        </div>
+        <div class="panel-grid">
+          <div class="panel-block">
+            <h2>Buscar ruta (Dijkstra)</h2>
+            <form id="search-form" class="route-form">
+              <div class="field">
+                <label for="search-mode">Modo de búsqueda</label>
+                <select id="search-mode">
+                  <option value="distancia">Distancia mínima</option>
+                  <option value="costo" selected>Costo mínimo (precio)</option>
+                  <option value="tiempo">Tiempo mínimo</option>
+                  <option value="destinos">Mayor cantidad de destinos</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="search-origin-country">Pais origen</label>
+                <input id="search-origin-country" type="text" list="search-origin-suggestions"
+                  placeholder="Ej: Colombia" autocomplete="off" />
+                <datalist id="search-origin-suggestions"></datalist>
+              </div>
+              <div class="field">
+                <label for="search-destination-country">Pais destino</label>
+                <input id="search-destination-country" type="text" list="search-destination-suggestions"
+                  placeholder="Ej: Peru" autocomplete="off" />
+                <datalist id="search-destination-suggestions"></datalist>
+              </div>
+              <div class="field-grid">
+                <div class="field">
+                  <label for="search-budget">Presupuesto total (USD)</label>
+                  <input id="search-budget" type="number" step="0.01" min="0" />
+                </div>
+                <div class="field">
+                  <label for="search-aircraft">Aeronaves permitidas (coma)</label>
+                  <input id="search-aircraft" type="text" placeholder="A320, B737" />
+                </div>
+              </div>
+              <div class="field-grid">
+                <div class="field">
+                  <label for="search-time">Tiempo maximo (min)</label>
+                  <input id="search-time" type="number" step="1" min="0" />
+                </div>
+                <div class="field">
+                  <label for="search-secondary">Excluir secundarios</label>
+                  <select id="search-secondary">
+                    <option value="false" selected>Permitir</option>
+                    <option value="true">Excluir</option>
+                  </select>
+                </div>
+              </div>
+              <div class="checkbox-row">
+                <label><input id="search-lodging" type="checkbox" checked /> Incluir alojamiento</label>
+                <label><input id="search-food" type="checkbox" checked /> Incluir alimentacion</label>
+                <label><input id="search-work" type="checkbox" checked /> Incluir trabajos</label>
+              </div>
+              <button class="primary" type="submit">Buscar ruta</button>
+            </form>
+          </div>
+          <div class="panel-block">
+            <h2>Viaje interactivo (2.3)</h2>
+            <form id="trip-form" class="route-form">
+              <div class="field">
+                <label for="trip-origin">Pais origen</label>
+                <input id="trip-origin" type="text" list="trip-origin-suggestions"
+                  placeholder="Ej: Colombia" autocomplete="off" />
+                <datalist id="trip-origin-suggestions"></datalist>
+              </div>
+              <div class="field">
+                <label for="trip-budget">Presupuesto inicial (USD)</label>
+                <input id="trip-budget" type="number" step="0.01" min="1" value="1000" />
+              </div>
+              <button class="primary" type="submit">Iniciar viaje</button>
+            </form>
+            <div id="trip-panel" class="hidden">
+              <hr class="divider" />
+              <div id="trip-status" class="trip-status"></div>
+              <div id="trip-actions" class="trip-actions"></div>
+              <div id="trip-report" class="trip-report hidden"></div>
+            </div>
+          </div>
+          <div class="panel-block">
+            <h2>Agregar ruta</h2>
+            <form id="route-form" class="route-form">
+              <div class="field">
+                <label for="origin-country">Pais origen</label>
+                <input id="origin-country" type="text" list="origin-suggestions" placeholder="Ej: Colombia"
+                  autocomplete="off" />
+                <datalist id="origin-suggestions"></datalist>
+              </div>
+              <div class="field">
+                <label for="destination-country">Pais destino</label>
+                <input id="destination-country" type="text" list="destination-suggestions" placeholder="Ej: Peru"
+                  autocomplete="off" />
+                <datalist id="destination-suggestions"></datalist>
+              </div>
+
+              <div class="field-grid">
+                <div class="field">
+                  <label for="route-distance">Distancia (km)</label>
+                  <input id="route-distance" type="number" step="1" min="1" placeholder="Auto" readonly />
+                </div>
+                <div class="field">
+                  <label for="route-cost">Costo base (USD)</label>
+                  <input id="route-cost" type="number" step="0.01" min="0" />
+                </div>
+              </div>
+              <div class="field-grid">
+                <div class="field">
+                  <label for="route-stay">Estancia minima (min)</label>
+                  <input id="route-stay" type="number" step="1" min="0" />
+                </div>
+                <div class="field">
+                  <label for="route-aircraft">Aeronaves (coma)</label>
+                  <input id="route-aircraft" type="text" placeholder="A320, B737" />
+                </div>
+              </div>
+
+              <details id="origin-node-section" class="node-section">
+                <summary>Datos pais origen (si no existe)</summary>
+                <div class="node-grid">
+                  <div class="field">
+                    <label for="origin-hub">Tipo</label>
+                    <select id="origin-hub">
+                      <option value="true">Hub</option>
+                      <option value="false">Secundario</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="origin-lodging">Costo alojamiento</label>
+                    <input id="origin-lodging" type="number" step="0.01" min="0" />
+                  </div>
+                </div>
+                <div class="list-block">
+                  <div class="list-header">
+                    <span>Actividades</span>
+                    <button type="button" class="ghost" data-add-activity="origin">
+                      Agregar actividad
+                    </button>
+                  </div>
+                  <div id="origin-activities" class="list-container"></div>
+                </div>
+                <div class="list-block">
+                  <div class="list-header">
+                    <span>Trabajos</span>
+                    <button type="button" class="ghost" data-add-job="origin">
+                      Agregar trabajo
+                    </button>
+                  </div>
+                  <div id="origin-jobs" class="list-container"></div>
+                </div>
+              </details>
+
+              <details id="destination-node-section" class="node-section">
+                <summary>Datos pais destino (si no existe)</summary>
+                <div class="node-grid">
+                  <div class="field">
+                    <label for="destination-hub">Tipo</label>
+                    <select id="destination-hub">
+                      <option value="true">Hub</option>
+                      <option value="false">Secundario</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="destination-lodging">Costo alojamiento</label>
+                    <input id="destination-lodging" type="number" step="0.01" min="0" />
+                  </div>
+                </div>
+                <div class="list-block">
+                  <div class="list-header">
+                    <span>Actividades</span>
+                    <button type="button" class="ghost" data-add-activity="destination">
+                      Agregar actividad
+                    </button>
+                  </div>
+                  <div id="destination-activities" class="list-container"></div>
+                </div>
+                <div class="list-block">
+                  <div class="list-header">
+                    <span>Trabajos</span>
+                    <button type="button" class="ghost" data-add-job="destination">
+                      Agregar trabajo
+                    </button>
+                  </div>
+                  <div id="destination-jobs" class="list-container"></div>
+                </div>
+              </details>
+
+              <button class="primary" type="submit">Agregar ruta</button>
+            </form>
+          </div>
+        </div>
+      </aside>
     </main>
   </div>
 

@@ -62,9 +62,10 @@ export class MapRenderer {
 
     if (coords.length >= 2) {
       const line = L.polyline(coords, {
-        color: this.colors.route,
-        weight: 3,
-        opacity: 0.9,
+        color: options.tripPath ? this.colors.trip : this.colors.route,
+        weight: options.tripPath ? 4 : 3,
+        opacity: options.tripPath ? 0.8 : 0.9,
+        dashArray: options.tripPath ? "10, 6" : null,
       });
       line.addTo(this.routeLayer);
     }
@@ -92,6 +93,24 @@ export class MapRenderer {
     }
 
     this._setDetailsLines(lines);
+  }
+
+  setTripPath(coords, camino) {
+    this._clearRoute();
+    if (coords.length >= 2) {
+      const line = L.polyline(coords, {
+        color: this.colors.trip,
+        weight: 4,
+        opacity: 0.8,
+        dashArray: "10, 6",
+      });
+      line.addTo(this.routeLayer);
+    }
+    const pathStr = (camino || []).join(" -> ");
+    this._setDetailsLines([
+      "Viaje interactivo - Ruta:",
+      pathStr,
+    ]);
   }
 
   _initMap() {
@@ -247,6 +266,7 @@ export class MapRenderer {
       edge: read("--edge", "rgba(15, 23, 42, 0.3)"),
       nodeStroke: read("--label", "#0f172a"),
       route: read("--accent", "#0ea5a4"),
+      trip: read("--trip", "#8b5cf6"),
     };
   }
 }

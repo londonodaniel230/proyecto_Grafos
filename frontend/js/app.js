@@ -5,6 +5,7 @@ import { GeocodeService } from "./services/geocode_service.js";
 import { NodeFactory } from "./services/node_factory.js";
 import { RouteFormController } from "./controllers/route_form_controller.js";
 import { RouteSearchController } from "./controllers/route_search_controller.js";
+import { TripController } from "./controllers/trip_controller.js";
 import { StatusPanel } from "./ui/status_panel.js";
 
 const fileInput = document.getElementById("file-input");
@@ -38,10 +39,19 @@ const searchController = new RouteSearchController({
   api,
 });
 
+const tripForm = document.getElementById("trip-form");
+const tripController = new TripController({
+  formEl: tripForm,
+  store,
+  renderer,
+  api,
+});
+
 renderer.resize();
 window.addEventListener("resize", () => renderer.resize());
 routeController.init();
 searchController.init();
+tripController.init();
 
 fileInput.addEventListener("change", async () => {
   statusPanel.clearErrors();
@@ -63,6 +73,7 @@ fileInput.addEventListener("change", async () => {
     statusPanel.setStatus("Grafo cargado.");
     routeController.onGraphLoaded();
     searchController.onGraphLoaded();
+    tripController.onGraphLoaded();
   } catch (error) {
     statusPanel.setStatus("Error al cargar el JSON.");
     const messages =

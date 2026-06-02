@@ -7,6 +7,16 @@ DEFAULT_PRESUPUESTO_MINIMO_PORC = 35.0
 DEFAULT_INTERVALO_ALOJAMIENTO = 20.0
 DEFAULT_INTERVALO_ALIMENTACION = 8.0
 
+# Valores predeterminados para los tres tipos de aeronave del requerimiento 2.3
+# Avión Comercial: 0.18 USD/km, 0.12 min/km
+# Avión Regional:  0.25 USD/km, 0.7  min/km
+# Hélice:          1.1  USD/km, 2.5  min/km
+DEFAULT_AIRCRAFT: dict = {
+    "Avión Comercial": AircraftConfig(costo_km=0.18, tiempo_km=0.12),
+    "Avión Regional": AircraftConfig(costo_km=0.25, tiempo_km=0.7),
+    "Hélice": AircraftConfig(costo_km=1.1, tiempo_km=2.5),
+}
+
 
 class ValidationContext:
     def __init__(self) -> None:
@@ -220,55 +230,56 @@ def read_optional_number(
 
 
 def parse_aircraft_config(raw: Any, ctx: ValidationContext) -> Dict[str, AircraftConfig]:
-    if raw is None:
-        return {}
-
-    obj = ensure_object(raw, "configuracion.aeronaves", ctx)
-    if obj is None:
-        return {}
-
     aeronaves: Dict[str, AircraftConfig] = {}
-    for key, value in obj.items():
-        if not isinstance(key, str):
-            ctx.add("configuracion.aeronaves keys must be strings.")
-            continue
 
-        entry = ensure_object(value, f"configuracion.aeronaves.{key}", ctx)
-        if entry is None:
-            continue
+    if raw is not None:
+        obj = ensure_object(raw, "configuracion.aeronaves", ctx)
+        if obj is not None:
+            for key, value in obj.items():
+                if not isinstance(key, str):
+                    ctx.add("configuracion.aeronaves keys must be strings.")
+                    continue
 
-        costo_km = ensure_number(
-            entry.get("costoKm"), f"configuracion.aeronaves.{key}.costoKm", ctx
-        )
-        tiempo_km = ensure_number(
-            entry.get("tiempoKm"), f"configuracion.aeronaves.{key}.tiempoKm", ctx
-        )
+                entry = ensure_object(value, f"configuracion.aeronaves.{key}", ctx)
+                if entry is None:
+                    continue
 
-        if None in (costo_km, tiempo_km):
-            continue
+                costo_km = ensure_number(
+                    entry.get("costoKm"), f"configuracion.aeronaves.{key}.costoKm", ctx
+                )
+                tiempo_km = ensure_number(
+                    entry.get("tiempoKm"), f"configuracion.aeronaves.{key}.tiempoKm", ctx
+                )
 
-        aeronaves[key] = AircraftConfig(costo_km=costo_km, tiempo_km=tiempo_km)
+                if None in (costo_km, tiempo_km):
+                    continue
+
+                aeronaves[key] = AircraftConfig(costo_km=costo_km, tiempo_km=tiempo_km)
+
+    # Añadir aeronaves por defecto si no están definidas
+    for nombre, config in DEFAULT_AIRCRAFT.items():
+        if nombre not in aeronaves:
+            aeronaves[nombre] = config
 
     return aeronaves
 
 
+def _make_default_config() -> GlobalConfig:
+    return GlobalConfig(
+        aeronaves=dict(DEFAULT_AIRCRAFT),
+        presupuesto_minimo_porc=DEFAULT_PRESUPUESTO_MINIMO_PORC,
+        intervalo_alojamiento=DEFAULT_INTERVALO_ALOJAMIENTO,
+        intervalo_alimentacion=DEFAULT_INTERVALO_ALIMENTACION,
+    )
+
+
 def parse_config(raw: Any, ctx: ValidationContext) -> GlobalConfig:
     if raw is None:
-        return GlobalConfig(
-            aeronaves={},
-            presupuesto_minimo_porc=DEFAULT_PRESUPUESTO_MINIMO_PORC,
-            intervalo_alojamiento=DEFAULT_INTERVALO_ALOJAMIENTO,
-            intervalo_alimentacion=DEFAULT_INTERVALO_ALIMENTACION,
-        )
+        return _make_default_config()
 
     obj = ensure_object(raw, "configuracion", ctx)
     if obj is None:
-        return GlobalConfig(
-            aeronaves={},
-            presupuesto_minimo_porc=DEFAULT_PRESUPUESTO_MINIMO_PORC,
-            intervalo_alojamiento=DEFAULT_INTERVALO_ALOJAMIENTO,
-            intervalo_alimentacion=DEFAULT_INTERVALO_ALIMENTACION,
-        )
+        return _make_default_config()
 
     aeronaves = parse_aircraft_config(obj.get("aeronaves"), ctx)
     presupuesto = read_optional_number(

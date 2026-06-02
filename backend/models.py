@@ -9,11 +9,16 @@ Clases originales (sin cambios):
 Clases añadidas por PERSONA 1 – Algoritmos y lógica de rutas:
     RouteStep   – detalle de un tramo individual dentro de una ruta.
     RouteResult – resultado completo devuelto por los algoritmos de ruta.
+
+Clases añadidas para 2.3 – Planificación avanzada con gestión dinámica:
+    TripDecision – una decisión tomada en un paso del viaje interactivo.
+    StepOptions  – opciones disponibles al viajero en un paso concreto.
+    TripState    – estado completo del viaje interactivo.
 """
 
 import math
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 
 # ===========================================================================
@@ -223,4 +228,125 @@ class RouteResult:
             "totalCosto": total_costo,
             "encontrado": self.encontrado,
             "error": self.error,
+        }
+
+
+# ===========================================================================
+# Modelos PLANIFICACION AVANZADA – 2.3
+# ===========================================================================
+
+@dataclass
+class TripDecision:
+    """Registro de una decisión tomada durante el viaje interactivo."""
+
+    tipo: str  # "vuelo", "alojamiento", "alimentacion", "actividad", "trabajo", "tiempo_libre", "fin"
+    node_id: str
+    detalle: Dict[str, Any]
+    costo: float
+    ingreso: float
+    tiempo_invertido_horas: float
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "tipo": self.tipo,
+            "nodeId": self.node_id,
+            "detalle": self.detalle,
+            "costo": self.costo,
+            "ingreso": self.ingreso,
+            "tiempoInvertidoHoras": self.tiempo_invertido_horas,
+        }
+
+
+@dataclass
+class StepOptions:
+    """Opciones disponibles al viajero en un paso concreto del viaje."""
+
+    # Información del paso actual
+    node_id: str
+    node_nombre: str
+    node_ciudad: str
+    node_pais: str
+
+    # Estado actual del viaje
+    presupuesto_actual: float
+    presupuesto_inicial: float
+    tiempo_transcurrido_horas: float
+    total_gastado: float
+    total_ganado: float
+    destinos_visitados: List[str]
+    puede_trabajar: bool  # True si presupuesto < 35% del inicial
+
+    # Requerimientos obligatorios
+    necesita_alojamiento: bool
+    necesita_alimentacion: bool
+    costo_alojamiento: float
+    costo_alimentacion: float
+
+    # Actividades opcionales disponibles en este nodo
+    actividades_opcionales: List[Activity]
+
+    # Trabajos disponibles en este nodo
+    trabajos_disponibles: List[Job]
+
+    # Vuelos disponibles desde este nodo
+    vuelos_disponibles: List[Dict[str, Any]]
+
+    # Viaje completado?
+    viaje_completado: bool
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "nodeId": self.node_id,
+            "nodeNombre": self.node_nombre,
+            "nodeCiudad": self.node_ciudad,
+            "nodePais": self.node_pais,
+            "presupuestoActual": self.presupuesto_actual,
+            "presupuestoInicial": self.presupuesto_inicial,
+            "tiempoTranscurridoHoras": self.tiempo_transcurrido_horas,
+            "totalGastado": self.total_gastado,
+            "totalGanado": self.total_ganado,
+            "destinosVisitados": self.destinos_visitados,
+            "puedeTrabajar": self.puede_trabajar,
+            "necesitaAlojamiento": self.necesita_alojamiento,
+            "necesitaAlimentacion": self.necesita_alimentacion,
+            "costoAlojamiento": self.costo_alojamiento,
+            "costoAlimentacion": self.costo_alimentacion,
+            "actividadesOpcionales": [a.to_dict() for a in self.actividades_opcionales],
+            "trabajosDisponibles": [j.to_dict() for j in self.trabajos_disponibles],
+            "vuelosDisponibles": self.vuelos_disponibles,
+            "viajeCompletado": self.viaje_completado,
+        }
+
+
+@dataclass
+class TripReport:
+    """Reporte final del viaje interactivo."""
+
+    camino: List[str]
+    decisiones: List[TripDecision]
+    total_gastado: float
+    total_ganado: float
+    presupuesto_final: float
+    tiempo_total_horas: float
+    destinos_visitados: int
+    vuelos_realizados: int
+    actividades_realizadas: int
+    trabajos_realizados: int
+    alojamientos_pagados: int
+    alimentos_consumidos: int
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "camino": self.camino,
+            "decisiones": [d.to_dict() for d in self.decisiones],
+            "totalGastado": round(self.total_gastado, 2),
+            "totalGanado": round(self.total_ganado, 2),
+            "presupuestoFinal": round(self.presupuesto_final, 2),
+            "tiempoTotalHoras": round(self.tiempo_total_horas, 2),
+            "destinosVisitados": self.destinos_visitados,
+            "vuelosRealizados": self.vuelos_realizados,
+            "actividadesRealizadas": self.actividades_realizadas,
+            "trabajosRealizados": self.trabajos_realizados,
+            "alojamientosPagados": self.alojamientos_pagados,
+            "alimentosConsumidos": self.alimentos_consumidos,
         }

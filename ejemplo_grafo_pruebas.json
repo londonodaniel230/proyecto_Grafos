@@ -28,8 +28,14 @@
       "esHub": true,
       "costoAlojamiento": 80,
       "costoAlimentacion": 15,
-      "actividades": [],
-      "trabajos": [],
+      "actividades": [
+        {"nombre": "Tour por La Candelaria", "tipo": "cultural", "duracionMin": 120, "costoUSD": 25},
+        {"nombre": "Museo del Oro", "tipo": "cultural", "duracionMin": 90, "costoUSD": 15}
+      ],
+      "trabajos": [
+        {"nombre": "Cargador de equipaje", "tarifaHora": 12, "maxHoras": 6},
+        {"nombre": "Asistente de rampa", "tarifaHora": 15, "maxHoras": 8}
+      ],
       "lat": 4.7022,
       "lon": -74.1469
     },
@@ -42,8 +48,14 @@
       "esHub": true,
       "costoAlojamiento": 120,
       "costoAlimentacion": 20,
-      "actividades": [],
-      "trabajos": [],
+      "actividades": [
+        {"nombre": "Visita a South Beach", "tipo": "turistica", "duracionMin": 180, "costoUSD": 10},
+        {"nombre": "Tour por Little Havana", "tipo": "cultural", "duracionMin": 120, "costoUSD": 20}
+      ],
+      "trabajos": [
+        {"nombre": "Guía de aeropuerto", "tarifaHora": 18, "maxHoras": 6},
+        {"nombre": "Asistente de mostrador", "tarifaHora": 14, "maxHoras": 8}
+      ],
       "lat": 25.7959,
       "lon": -80.287
     },
@@ -56,8 +68,14 @@
       "esHub": true,
       "costoAlojamiento": 150,
       "costoAlimentacion": 25,
-      "actividades": [],
-      "trabajos": [],
+      "actividades": [
+        {"nombre": "Tour por Times Square", "tipo": "turistica", "duracionMin": 120, "costoUSD": 0},
+        {"nombre": "Museo Metropolitano", "tipo": "cultural", "duracionMin": 180, "costoUSD": 30}
+      ],
+      "trabajos": [
+        {"nombre": "Cargador de equipaje", "tarifaHora": 20, "maxHoras": 6},
+        {"nombre": "Agente de seguridad", "tarifaHora": 22, "maxHoras": 8}
+      ],
       "lat": 40.6413,
       "lon": -73.7781
     },
@@ -70,8 +88,14 @@
       "esHub": true,
       "costoAlojamiento": 130,
       "costoAlimentacion": 22,
-      "actividades": [],
-      "trabajos": [],
+      "actividades": [
+        {"nombre": "Visita a Hollywood", "tipo": "turistica", "duracionMin": 240, "costoUSD": 35},
+        {"nombre": "Paseo por Santa Monica", "tipo": "turistica", "duracionMin": 120, "costoUSD": 5}
+      ],
+      "trabajos": [
+        {"nombre": "Asistente de rampa", "tarifaHora": 19, "maxHoras": 8},
+        {"nombre": "Limpieza de aeronaves", "tarifaHora": 16, "maxHoras": 6}
+      ],
       "lat": 33.9425,
       "lon": -118.4081
     },
