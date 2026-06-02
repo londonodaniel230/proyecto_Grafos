@@ -96,7 +96,7 @@ export class RouteFormController {
       datalist.innerHTML = "";
       nodes.forEach((node) => {
         const option = document.createElement("option");
-        option.value = node.pais || node.nombre || node.id;
+        option.value = `${node.pais} | ${node.ciudad} | ${node.nombre}`;
         datalist.appendChild(option);
       });
     };

@@ -9,6 +9,7 @@ export class GraphRenderer {
     this.graph = null;
     this.positions = new Map();
     this.selectedNodeId = null;
+    this.selectedEdge = null;
     this.colors = this._loadColors();
     this.width = 0;
     this.height = 0;
@@ -190,7 +191,7 @@ export class GraphRenderer {
       }
 
       ctx.fillStyle = this.colors.label;
-      ctx.fillText(node.id, pos.x + radius + 6, pos.y);
+      ctx.fillText(node.ciudad || node.id, pos.x + radius + 6, pos.y);
     }
 
     ctx.restore();

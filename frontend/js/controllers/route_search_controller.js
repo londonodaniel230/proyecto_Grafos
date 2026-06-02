@@ -78,7 +78,7 @@ export class RouteSearchController {
       datalist.innerHTML = "";
       nodes.forEach((node) => {
         const option = document.createElement("option");
-        option.value = node.pais || node.nombre || node.id;
+        option.value = `${node.pais} | ${node.ciudad} | ${node.nombre}`;
         datalist.appendChild(option);
       });
     };
@@ -115,8 +115,9 @@ export class RouteSearchController {
       return;
     }
 
-    const originNodes = this.store.findNodesByCountry(originValue);
-    const destinationNodes = this.store.findNodesByCountry(destinationValue);
+    const graphNodes = this.store.getGraph().nodos || [];
+    const originNodes = [findNodeByDisplay(graphNodes, originValue)].filter(Boolean);
+    const destinationNodes = [findNodeByDisplay(graphNodes, destinationValue)].filter(Boolean);
 
     if (!originNodes.length || !destinationNodes.length) {
       this.statusPanel.showErrors(["Origen o destino no encontrados."]);
@@ -205,4 +206,9 @@ function uniqueIds(nodes) {
     }
   });
   return ids;
+}
+
+
+function findNodeByDisplay(nodes, value) {
+ return nodes.find(node => `${node.pais} | ${node.ciudad} | ${node.nombre}` === value);
 }
