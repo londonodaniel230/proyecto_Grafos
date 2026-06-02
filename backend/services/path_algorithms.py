@@ -7,7 +7,7 @@ Algoritmos implementados:
     - dijkstra_por_distancia : ruta óptima usando distancia_km como peso.
     - dijkstra_por_costo     : ruta optima usando costo como peso.
     - dijkstra_por_tiempo    : ruta optima usando tiempo como peso.
-    - dfs_mayor_destinos     : ruta con mas destinos con restricciones.
+    - bfs_mayor_destinos     : ruta con mas destinos con restricciones.
 """
 
 import math
@@ -864,10 +864,10 @@ def dijkstra_por_tiempo(
 
 
 # ---------------------------------------------------------------------------
-# DFS mayor cantidad de destinos (con restricciones)
+# BFS mayor cantidad de destinos (con restricciones)
 # ---------------------------------------------------------------------------
 
-def dfs_mayor_destinos(
+def bfs_mayor_destinos(
     graph: Graph,
     inicio_id: str,
     destino_id: str,
@@ -881,7 +881,7 @@ def dfs_mayor_destinos(
 
     Reglas:
         - Si existe ruta directa valida, se retorna esa ruta.
-        - Si no, se exploran rutas con DFS sin repetir nodos.
+        - Si no, se exploran rutas con BFS sin repetir nodos.
 
     Restricciones soportadas:
         - presupuesto_total
@@ -983,14 +983,16 @@ def dfs_mayor_destinos(
             total_costo=costo,
         )
 
-    # DFS para maximizar destinos
-    stack: List[Tuple[str, List[str], List[Tuple[str, float, float, float, str]], Set[str], float, float, float]] = []
+    # BFS para maximizar destinos
+    from collections import deque
+
+    cola: "deque[Tuple[str, List[str], List[Tuple[str, float, float, float, str]], Set[str], float, float, float]]" = deque()
     for inicio in inicio_set:
         if inicio in nodos_permitidos:
-            stack.append((inicio, [inicio], [], {inicio}, 0.0, 0.0, 0.0))
+            cola.append((inicio, [inicio], [], {inicio}, 0.0, 0.0, 0.0))
 
-    while stack:
-        actual, camino, aristas_camino, visitados, costo_acum, tiempo_acum, km_acum = stack.pop()
+    while cola:
+        actual, camino, aristas_camino, visitados, costo_acum, tiempo_acum, km_acum = cola.popleft()
 
         if actual in destino_set:
             es_mejor = False
@@ -1026,7 +1028,7 @@ def dfs_mayor_destinos(
 
             nuevo_visitados = set(visitados)
             nuevo_visitados.add(vecino)
-            stack.append(
+            cola.append(
                 (
                     vecino,
                     camino + [vecino],

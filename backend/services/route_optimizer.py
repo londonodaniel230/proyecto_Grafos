@@ -17,7 +17,7 @@ from ..models import Graph, RouteResult
 from .path_algorithms import (
     CostOptions,
     TraversalConstraints,
-    dfs_mayor_destinos,
+    bfs_mayor_destinos,
     dijkstra_por_costo,
     dijkstra_por_distancia,
     dijkstra_por_tiempo,
@@ -29,7 +29,7 @@ _ALGORITMOS = {
     "distancia": dijkstra_por_distancia,
     "costo": dijkstra_por_costo,
     "tiempo": dijkstra_por_tiempo,
-    "destinos": dfs_mayor_destinos,
+    "destinos": bfs_mayor_destinos,
 }
 
 
