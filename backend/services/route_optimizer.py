@@ -33,8 +33,30 @@ _ALGORITMOS = {
 }
 
 
+def _filtrar_aristas_bloqueadas(graph: Graph, blocked: Optional[list] = None) -> Graph:
+    if not blocked:
+        return graph
+    bloqueados = set()
+    for item in blocked:
+        o = (item.get("origen") or "").strip()
+        d = (item.get("destino") or "").strip()
+        if o and d:
+            bloqueados.add((o, d))
+    if not bloqueados:
+        return graph
+    nuevas_aristas = [
+        e for e in graph.aristas
+        if (e.origen, e.destino) not in bloqueados
+    ]
+    return Graph(
+        nodos=list(graph.nodos),
+        aristas=nuevas_aristas,
+        configuracion=graph.configuracion,
+    )
+
+
 def optimizar_ruta(
-    graph: Graph,  
+    graph: Graph,
     inicio_id: str,
     destino_id: str,
     modo: str = "distancia",
@@ -43,6 +65,7 @@ def optimizar_ruta(
     inicio_ids: Optional[list] = None,
     destino_ids: Optional[list] = None,
     restricciones: Optional[TraversalConstraints] = None,
+    rutas_bloqueadas: Optional[list] = None,
 ) -> RouteResult:
     """
     Calcula la ruta óptima entre dos nodos según el modo indicado.
@@ -69,6 +92,8 @@ def optimizar_ruta(
     RouteResult – siempre se devuelve un objeto; si hay error, el campo
     ``encontrado`` será False y ``error`` contendrá la descripción.
     """
+    graph = _filtrar_aristas_bloqueadas(graph, rutas_bloqueadas)
+
     modo_normalizado = modo.strip().lower()
 
     if modo_normalizado not in _ALGORITMOS:

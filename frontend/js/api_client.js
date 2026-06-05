@@ -109,4 +109,52 @@ export class ApiClient {
 
     return data;
   }
+
+  async blockRoute(payload) {
+    const response = await fetch("/api/route/block", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new ApiError(data.errors || ["Error blocking route."]);
+    }
+    return data;
+  }
+
+  async unblockRoute(payload) {
+    const response = await fetch("/api/route/unblock", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new ApiError(data.errors || ["Error unblocking route."]);
+    }
+    return data;
+  }
+
+  async getBlockedRoutes() {
+    const response = await fetch("/api/route/blocked");
+    const data = await response.json();
+    if (!response.ok) {
+      throw new ApiError(data.errors || ["Error fetching blocked routes."]);
+    }
+    return data.blocked || [];
+  }
+
+  async autoPlan(payload) {
+    const response = await fetch("/api/plan", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new ApiError(data.errors || ["Error planning routes."]);
+    }
+    return data;
+  }
 }

@@ -282,7 +282,7 @@ class TripService:
 
         # Validar subsidio (costo_base == 0) no más del 20% de distancia total
         if float(edge.costo_base) == 0.0 or costo_vuelo == 0.0:
-            subsidio_limite = self._subsidized_distance_limit()
+            subsidio_limite = self._subsidized_distance_limit(edge.distancia_km)
             if edge.distancia_km > subsidio_limite:
                 return (
                     self.get_step_options(),
@@ -381,15 +381,30 @@ class TripService:
         return (self.time_elapsed_hours - self.last_food_time) >= self.food_interval
 
     def _check_food_during_stay(self, duration_hours: float) -> None:
-        """Verifica si durante una estancia se necesita alimentación."""
+        """Verifica si durante una estancia se necesita alimentación y cobra automáticamente."""
         if self.food_interval <= 0:
             return
-        # Simular en pasos de 1 hora si se cruza el umbral
         for _ in range(int(duration_hours)):
             if self._needs_food():
-                # Se registra pero no se cobra automáticamente; el sistema
-                # le recordará al viajero en el siguiente paso
-                pass
+                node = self._current_node()
+                costo = float(node.costo_alimentacion or 0)
+                if costo <= self.current_budget:
+                    self.current_budget -= costo
+                    self.total_spent += costo
+                    self.last_food_time = self.time_elapsed_hours
+                    self.decisions.append(TripDecision(
+                        tipo="alimentacion",
+                        node_id=node.id,
+                        detalle={
+                            "costo": costo,
+                            "duracionHoras": 1.0,
+                            "automatico": True,
+                            "motivo": "Durante estancia",
+                        },
+                        costo=costo,
+                        ingreso=0.0,
+                        tiempo_invertido_horas=1.0,
+                    ))
 
     def _check_food_during_flight(self, flight_hours: float) -> None:
         """Si durante el vuelo se cumplen 8h de alimentación, se cobra del último nodo."""
@@ -471,11 +486,14 @@ class TripService:
 
         return flights
 
-    def _subsidized_distance_limit(self) -> float:
-        """Calcula el 20% de la distancia total recorrida para rutas subsidiadas."""
+    def _subsidized_distance_limit(self, candidate_distance: float = 0) -> float:
+        """Calcula el 20% de la distancia total esperada para rutas subsidiadas."""
         total_distance = sum(
             d.detalle.get("distanciaKm", 0)
             for d in self.decisions
             if d.tipo == "vuelo"
         )
-        return total_distance * 0.20
+        expected_total = total_distance + candidate_distance
+        if expected_total <= 0:
+            return 0.0
+        return expected_total * 0.20

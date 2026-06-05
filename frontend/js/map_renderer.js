@@ -128,7 +128,26 @@ export class MapRenderer {
     this.edgeLayer = L.layerGroup().addTo(this.map);
     this.routeLayer = L.layerGroup().addTo(this.map);
     this.nodeLayer = L.layerGroup().addTo(this.map);
+    this.blockedLayer = L.layerGroup().addTo(this.map);
+    this.labelLayer = L.layerGroup().addTo(this.map);
+    this._labelsVisible = true;
     this.map.setView([15, 0], 2);
+  }
+
+  _getAircraftByNode() {
+    const aircraftByNode = {};
+    if (!this.graph) return aircraftByNode;
+    for (const edge of this.graph.aristas || []) {
+      if (!aircraftByNode[edge.origen]) {
+        aircraftByNode[edge.origen] = new Set();
+      }
+      (edge.aeronaves || []).forEach((a) => aircraftByNode[edge.origen].add(a));
+    }
+    const result = {};
+    for (const [key, val] of Object.entries(aircraftByNode)) {
+      result[key] = Array.from(val).sort();
+    }
+    return result;
   }
 
   _render() {
@@ -140,6 +159,7 @@ export class MapRenderer {
     const nodeById = new Map(
       this.graph.nodos.map((node) => [node.id, node])
     );
+    const aircraftByNode = this._getAircraftByNode();
     const bounds = L.latLngBounds();
 
     this.graph.aristas.forEach((edge) => {
@@ -161,6 +181,22 @@ export class MapRenderer {
         }
       );
       line.addTo(this.edgeLayer);
+
+      // Mostrar distancia en km sobre la arista (en capa independiente)
+      if (edge.distanciaKm) {
+        const midLat = (from.lat + to.lat) / 2;
+        const midLon = (from.lon + to.lon) / 2;
+        const label = L.marker([midLat, midLon], {
+          icon: L.divIcon({
+            className: "edge-label",
+            html: `${edge.distanciaKm} km`,
+            iconSize: [80, 20],
+            iconAnchor: [40, 10],
+          }),
+          interactive: false,
+        });
+        label.addTo(this.labelLayer);
+      }
     });
 
     this.graph.nodos.forEach((node) => {
@@ -183,15 +219,61 @@ export class MapRenderer {
       });
 
       marker.on("click", () => {
-        this._setDetailsNode(node);
+        this._setDetailsNode(node, aircraftByNode[node.id] || []);
       });
 
       marker.addTo(this.nodeLayer);
       bounds.extend([node.lat, node.lon]);
     });
 
+    this._renderBlockedEdges();
+
     if (bounds.isValid()) {
       this.map.fitBounds(bounds, { padding: [40, 40] });
+    }
+  }
+
+  setBlockedRoutes(blockedRoutes) {
+    this._blockedRoutes = blockedRoutes || [];
+    this._render();
+  }
+
+  _renderBlockedEdges() {
+    this.blockedLayer.clearLayers();
+    if (!this.graph || !this._blockedRoutes) return;
+
+    const nodeById = new Map(this.graph.nodos.map((n) => [n.id, n]));
+    const blockedSet = new Set(
+      (this._blockedRoutes || []).map((b) => `${b.origen}|${b.destino}`)
+    );
+
+    this.graph.aristas.forEach((edge) => {
+      const key = `${edge.origen}|${edge.destino}`;
+      if (!blockedSet.has(key)) return;
+      const from = nodeById.get(edge.origen);
+      const to = nodeById.get(edge.destino);
+      if (!this._hasCoords(from) || !this._hasCoords(to)) return;
+      const line = L.polyline(
+        [[from.lat, from.lon], [to.lat, to.lon]],
+        {
+          color: "#ef4444",
+          weight: 4,
+          opacity: 0.8,
+          dashArray: "8, 4",
+        }
+      );
+      line.addTo(this.blockedLayer);
+    });
+  }
+
+  setLabelsVisible(visible) {
+    this._labelsVisible = visible;
+    if (this.labelLayer) {
+      if (visible) {
+        this.map.addLayer(this.labelLayer);
+      } else {
+        this.map.removeLayer(this.labelLayer);
+      }
     }
   }
 
@@ -201,6 +283,12 @@ export class MapRenderer {
     }
     if (this.nodeLayer) {
       this.nodeLayer.clearLayers();
+    }
+    if (this.blockedLayer) {
+      this.blockedLayer.clearLayers();
+    }
+    if (this.labelLayer) {
+      this.labelLayer.clearLayers();
     }
   }
 
@@ -229,7 +317,7 @@ export class MapRenderer {
     this.statsEl.appendChild(edgeLine);
   }
 
-  _setDetailsNode(node) {
+  _setDetailsNode(node, aeronavesDisponibles = []) {
     const lines = [
       `${node.pais || node.nombre || node.id}`,
       `Capital: ${node.ciudad}`,
@@ -237,9 +325,12 @@ export class MapRenderer {
       `Hub: ${node.esHub ? "si" : "no"}`,
       `Alojamiento USD: ${node.costoAlojamiento}`,
       `Alimentacion USD: ${node.costoAlimentacion}`,
-      `Actividades: ${node.actividades.length}`,
-      `Trabajos: ${node.trabajos.length}`,
+      `Actividades: ${(node.actividades || []).length}`,
+      `Trabajos: ${(node.trabajos || []).length}`,
     ];
+    if (aeronavesDisponibles.length > 0) {
+      lines.push(`Aeronaves: ${aeronavesDisponibles.join(", ")}`);
+    }
 
     this._setDetailsLines(lines);
   }

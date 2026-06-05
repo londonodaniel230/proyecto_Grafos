@@ -1,11 +1,15 @@
 from flask import Blueprint, jsonify, request
 
 from .errors import ValidationError
+from .services.blocked_routes import RouteBlocker
 from .services.geocoding import geocode_country
 from .services.graph_loader import GraphLoader
 from .services.path_algorithms import CostOptions, TraversalConstraints
 from .services.route_optimizer import optimizar_ruta
+from .services.route_planner import planificar_dos_alternativas
 from .services.trip_service import TripService
+
+_route_blocker = RouteBlocker()
 
 api_bp = Blueprint("api", __name__, url_prefix="/api")
 
@@ -106,6 +110,7 @@ def optimize_route():
             inicio_ids=inicio_ids,
             destino_ids=destino_ids,
             restricciones=restricciones,
+            rutas_bloqueadas=_route_blocker.get_blocked(),
         )
         return jsonify(resultado.to_dict())
     except ValidationError as exc:
@@ -129,6 +134,104 @@ def geocode():
         return jsonify({"errors": ["No geocoding results."]}), 404
 
     return jsonify({"results": results})
+
+
+# ---------------------------------------------------------------------------
+# Endpoints para interrupción de rutas (R4)
+# ---------------------------------------------------------------------------
+
+@api_bp.post("/route/block")
+def block_route():
+    loader = GraphLoader()
+    try:
+        payload = _get_payload()
+        if not isinstance(payload, dict):
+            raise ValidationError(["JSON body must be an object."])
+        graph_payload = payload.get("graph")
+        if graph_payload is None:
+            raise ValidationError(["Missing graph payload."])
+        loader.load(graph_payload)
+
+        origen = (payload.get("origen") or "").strip()
+        destino = (payload.get("destino") or "").strip()
+        if not origen or not destino:
+            raise ValidationError(["origen and destino are required."])
+        _route_blocker.block(origen, destino)
+        return jsonify({
+            "status": "blocked",
+            "origen": origen,
+            "destino": destino,
+            "blocked": _route_blocker.get_blocked(),
+        })
+    except ValidationError as exc:
+        return jsonify({"errors": exc.errors}), 400
+
+
+@api_bp.post("/route/unblock")
+def unblock_route():
+    try:
+        payload = _get_payload()
+        if not isinstance(payload, dict):
+            raise ValidationError(["JSON body must be an object."])
+        origen = (payload.get("origen") or "").strip()
+        destino = (payload.get("destino") or "").strip()
+        if not origen or not destino:
+            raise ValidationError(["origen and destino are required."])
+        _route_blocker.unblock(origen, destino)
+        return jsonify({
+            "status": "unblocked",
+            "origen": origen,
+            "destino": destino,
+            "blocked": _route_blocker.get_blocked(),
+        })
+    except ValidationError as exc:
+        return jsonify({"errors": exc.errors}), 400
+
+
+@api_bp.get("/route/blocked")
+def list_blocked_routes():
+    return jsonify({"blocked": _route_blocker.get_blocked()})
+
+
+# ---------------------------------------------------------------------------
+# Endpoint para planificación automática (R2 - dos alternativas)
+# ---------------------------------------------------------------------------
+
+@api_bp.post("/plan")
+def plan_routes():
+    loader = GraphLoader()
+    try:
+        payload = _get_payload()
+        if not isinstance(payload, dict):
+            raise ValidationError(["JSON body must be an object."])
+        graph_payload = payload.get("graph")
+        if graph_payload is None:
+            raise ValidationError(["Missing graph payload."])
+        graph = loader.load(graph_payload)
+
+        origin_id = (payload.get("originId") or payload.get("origin_id") or "").strip()
+        if not origin_id:
+            raise ValidationError(["originId is required."])
+        presupuesto = payload.get("budget")
+        if presupuesto is None:
+            raise ValidationError(["budget is required."])
+        presupuesto = float(presupuesto)
+        tiempo = payload.get("time")
+        if tiempo is None:
+            raise ValidationError(["time is required."])
+        tiempo = float(tiempo)
+
+        from .services.route_optimizer import _filtrar_aristas_bloqueadas
+        graph_filtrado = _filtrar_aristas_bloqueadas(graph, _route_blocker.get_blocked())
+        resultados = planificar_dos_alternativas(graph_filtrado, origin_id, presupuesto, tiempo)
+        return jsonify({
+            "porPresupuesto": resultados["porPresupuesto"].to_dict(),
+            "porTiempo": resultados["porTiempo"].to_dict(),
+        })
+    except ValidationError as exc:
+        return jsonify({"errors": exc.errors}), 400
+    except (ValueError, TypeError):
+        return jsonify({"errors": ["Invalid numeric values."]}), 400
 
 
 # ---------------------------------------------------------------------------

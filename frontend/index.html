@@ -4,259 +4,295 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Grafo de rutas</title>
+  <title>Grafo de rutas aereas</title>
   <link rel="stylesheet" href="css/styles.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 </head>
 
 <body>
-  <div class="page">
-    <header class="hero">
-      <div class="hero-text">
-        <p class="eyebrow">Proyecto 2</p>
-        <h1>Grafo de rutas aereas</h1>
-        <p class="subtitle">
-          Carga un JSON desde tu PC y visualiza nodos (aeropuertos) y aristas
-          (rutas).
-        </p>
-      </div>
-      <div class="upload-card">
-        <label class="file-label" for="file-input">Selecciona un archivo JSON</label>
-        <input id="file-input" type="file" accept=".json,application/json" />
-        <p class="hint">Formato esperado: nodos, aristas, configuracion (opcional).</p>
-      </div>
-    </header>
+  <!-- Top bar -->
+  <nav class="topbar">
+    <button id="menu-toggle" class="menu-toggle" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <span class="topbar-title">Grafo de rutas</span>
+    <label class="file-btn" for="file-input">
+      Cargar JSON
+      <input id="file-input" type="file" accept=".json,application/json" hidden />
+    </label>
+  </nav>
 
-    <main class="content">
-      <section class="canvas-card">
-        <div class="canvas-header">
-          <h2>Mapa del grafo</h2>
-          <div class="legend">
-            <span class="legend-item"><span class="dot hub"></span>Hub</span>
-            <span class="legend-item"><span class="dot node"></span>Regular</span>
-          </div>
-        </div>
-        <div class="map-wrap">
-          <div id="map"></div>
-        </div>
-      </section>
+  <!-- Side menu -->
+  <aside id="side-menu" class="side-menu">
+    <div class="menu-header">Navegacion</div>
+    <button class="menu-item active" data-view="inicio">
+      <span class="menu-icon">&#9679;</span> Inicio
+    </button>
+    <button class="menu-item" data-view="rutas">
+      <span class="menu-icon">&#8594;</span> Buscar rutas
+    </button>
+    <button class="menu-item" data-view="planificar">
+      <span class="menu-icon">&#9733;</span> Planificar viaje
+    </button>
+    <button class="menu-item" data-view="viaje">
+      <span class="menu-icon">&#9992;</span> Viaje interactivo
+    </button>
+    <button class="menu-item" data-view="bloqueo">
+      <span class="menu-icon">&#9888;</span> Bloqueo de rutas
+    </button>
+    <button class="menu-item" data-view="agregar">
+      <span class="menu-icon">&#43;</span> Agregar ruta
+    </button>
+    <div class="menu-spacer"></div>
+    <div class="menu-legend">
+      <div><span class="dot hub"></span> Hub</div>
+      <div><span class="dot node"></span> Secundario</div>
+    </div>
+  </aside>
 
-      <aside class="panel">
-        <div class="panel-grid">
-          <div class="panel-block">
-            <h2>Estado</h2>
-            <div id="status" class="status">Sin datos cargados.</div>
+  <!-- Overlay -->
+  <div id="menu-overlay" class="menu-overlay hidden"></div>
+
+  <!-- Main layout -->
+  <div class="app-layout">
+    <!-- Map section (always visible) -->
+    <section class="map-section">
+      <div class="map-header">
+        <h2>Mapa del grafo</h2>
+        <div class="map-controls">
+          <button id="toggle-labels" class="toggle-btn" title="Mostrar/ocultar distancias">Distancias</button>
+          <div id="status" class="status-badge">Sin datos</div>
+        </div>
+      </div>
+      <div class="map-wrap">
+        <div id="map"></div>
+      </div>
+      <div id="stats" class="map-stats">
+        <span>Nodos: 0</span>
+        <span>Aristas: 0</span>
+      </div>
+    </section>
+
+    <!-- Panel section (switches by view) -->
+    <aside class="panel-section">
+      <!-- ===== INICIO ===== -->
+      <div class="view-panel active" id="view-inicio">
+        <h2>Detalle de nodo</h2>
+        <div id="details" class="details">Selecciona un nodo en el mapa.</div>
+        <hr class="divider" />
+        <h2>Errores</h2>
+        <ul id="errors" class="errors"></ul>
+      </div>
+
+      <!-- ===== RUTAS ===== -->
+      <div class="view-panel" id="view-rutas">
+        <h2>Buscar ruta optima</h2>
+        <form id="search-form" class="route-form">
+          <div class="field">
+            <label for="search-mode">Modo</label>
+            <select id="search-mode">
+              <option value="distancia">Distancia minima</option>
+              <option value="costo" selected>Costo minimo</option>
+              <option value="tiempo">Tiempo minimo</option>
+              <option value="destinos">Mas destinos</option>
+            </select>
           </div>
-          <div class="panel-block">
-            <h2>Errores</h2>
-            <ul id="errors" class="errors"></ul>
-          </div>
-          <div class="panel-block">
-            <h2>Resumen</h2>
-            <div id="stats" class="stats">
-              <div>Nodos: 0</div>
-              <div>Aristas: 0</div>
+          <div class="field-grid">
+            <div class="field">
+              <label for="search-origin-country">Origen</label>
+              <input id="search-origin-country" type="text" list="search-origin-suggestions"
+                placeholder="Pais" autocomplete="off" />
+              <datalist id="search-origin-suggestions"></datalist>
+            </div>
+            <div class="field">
+              <label for="search-destination-country">Destino</label>
+              <input id="search-destination-country" type="text" list="search-destination-suggestions"
+                placeholder="Pais" autocomplete="off" />
+              <datalist id="search-destination-suggestions"></datalist>
             </div>
           </div>
-          <div class="panel-block">
-            <h2>Detalle de nodo</h2>
-            <div id="details" class="details">
-              Selecciona un nodo en el grafo para ver detalles.
-            </div>
-          </div>
-        </div>
-        <div class="panel-grid">
-          <div class="panel-block">
-            <h2>Buscar ruta (Dijkstra)</h2>
-            <form id="search-form" class="route-form">
+          <details>
+            <summary>Opciones avanzadas</summary>
+            <div class="field-grid">
               <div class="field">
-                <label for="search-mode">Modo de búsqueda</label>
-                <select id="search-mode">
-                  <option value="distancia">Distancia mínima</option>
-                  <option value="costo" selected>Costo mínimo (precio)</option>
-                  <option value="tiempo">Tiempo mínimo</option>
-                  <option value="destinos">Mayor cantidad de destinos</option>
+                <label for="search-budget">Presupuesto (USD)</label>
+                <input id="search-budget" type="number" step="0.01" min="0" placeholder="5000" />
+              </div>
+              <div class="field">
+                <label for="search-aircraft">Aeronaves</label>
+                <input id="search-aircraft" type="text" placeholder="Avion Comercial" />
+              </div>
+            </div>
+            <div class="field-grid">
+              <div class="field">
+                <label for="search-time">Tiempo max (h)</label>
+                <input id="search-time" type="number" step="1" min="0" />
+              </div>
+              <div class="field">
+                <label for="search-secondary">Secundarios</label>
+                <select id="search-secondary">
+                  <option value="false">Permitir</option>
+                  <option value="true">Excluir</option>
+                </select>
+              </div>
+            </div>
+            <div class="checkbox-row">
+              <label><input id="search-lodging" type="checkbox" checked /> Alojamiento</label>
+              <label><input id="search-food" type="checkbox" checked /> Alimentacion</label>
+              <label><input id="search-work" type="checkbox" checked /> Trabajos</label>
+            </div>
+          </details>
+          <button class="primary" type="submit">Buscar ruta</button>
+        </form>
+      </div>
+
+      <!-- ===== PLANIFICAR ===== -->
+      <div class="view-panel" id="view-planificar">
+        <h2>Planificacion automatica</h2>
+        <p class="hint">Maximiza destinos segun presupuesto o tiempo.</p>
+        <form id="plan-form" class="route-form">
+          <div class="field">
+            <label for="plan-origin">Origen</label>
+            <input id="plan-origin" type="text" list="plan-origin-suggestions"
+              placeholder="Pais" autocomplete="off" />
+            <datalist id="plan-origin-suggestions"></datalist>
+          </div>
+          <div class="field-grid">
+            <div class="field">
+              <label for="plan-budget">Presupuesto (USD)</label>
+              <input id="plan-budget" type="number" step="0.01" min="1" value="5000" />
+            </div>
+            <div class="field">
+              <label for="plan-time">Tiempo max (h)</label>
+              <input id="plan-time" type="number" step="0.5" min="1" value="48" />
+            </div>
+          </div>
+          <button class="primary" type="submit">Calcular</button>
+        </form>
+        <div id="plan-results" class="hidden">
+          <hr class="divider" />
+          <div class="plan-result">
+            <div class="plan-label">Por presupuesto:</div>
+            <div id="plan-result-budget" class="stats"></div>
+          </div>
+          <div class="plan-result">
+            <div class="plan-label">Por tiempo:</div>
+            <div id="plan-result-time" class="stats"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== VIAJE ===== -->
+      <div class="view-panel" id="view-viaje">
+        <h2>Viaje interactivo</h2>
+        <p class="hint">Gestiona tu presupuesto con trabajos y decisiones.</p>
+        <form id="trip-form" class="route-form">
+          <div class="field">
+            <label for="trip-origin">Origen</label>
+            <input id="trip-origin" type="text" list="trip-origin-suggestions"
+              placeholder="Pais" autocomplete="off" />
+            <datalist id="trip-origin-suggestions"></datalist>
+          </div>
+          <div class="field">
+            <label for="trip-budget">Presupuesto inicial (USD)</label>
+            <input id="trip-budget" type="number" step="0.01" min="1" value="1000" />
+          </div>
+          <button class="primary" type="submit">Iniciar viaje</button>
+        </form>
+        <div id="trip-panel" class="hidden">
+          <hr class="divider" />
+          <div id="trip-status" class="trip-status"></div>
+          <div id="trip-actions" class="trip-actions"></div>
+          <div id="trip-report" class="trip-report hidden"></div>
+        </div>
+      </div>
+
+      <!-- ===== BLOQUEO ===== -->
+      <div class="view-panel" id="view-bloqueo">
+        <h2>Interrupcion de rutas</h2>
+        <p class="hint">Bloquea rutas para simular interrupciones.</p>
+        <form id="block-form" class="route-form">
+          <div class="field-grid">
+            <div class="field">
+              <label for="block-origin">Origen (IATA)</label>
+              <input id="block-origin" type="text" list="block-origin-suggestions"
+                placeholder="BOG" autocomplete="off" />
+              <datalist id="block-origin-suggestions"></datalist>
+            </div>
+            <div class="field">
+              <label for="block-destino">Destino (IATA)</label>
+              <input id="block-destino" type="text" list="block-destino-suggestions"
+                placeholder="MIA" autocomplete="off" />
+              <datalist id="block-destino-suggestions"></datalist>
+            </div>
+          </div>
+          <div class="field-grid">
+            <button class="primary" type="submit" style="background:#ef4444">Bloquear</button>
+            <button class="primary" type="button" id="unblock-btn" style="background:#10b981">Desbloquear</button>
+          </div>
+        </form>
+        <div id="blocked-list" class="blocked-list">Sin rutas bloqueadas.</div>
+      </div>
+
+      <!-- ===== AGREGAR RUTA ===== -->
+      <div class="view-panel" id="view-agregar">
+        <h2>Agregar ruta</h2>
+        <form id="route-form" class="route-form">
+          <div class="field-grid">
+            <div class="field">
+              <label for="origin-country">Origen</label>
+              <input id="origin-country" type="text" list="origin-suggestions"
+                placeholder="Pais" autocomplete="off" />
+              <datalist id="origin-suggestions"></datalist>
+            </div>
+            <div class="field">
+              <label for="destination-country">Destino</label>
+              <input id="destination-country" type="text" list="destination-suggestions"
+                placeholder="Pais" autocomplete="off" />
+              <datalist id="destination-suggestions"></datalist>
+            </div>
+          </div>
+          <div class="field-grid">
+            <div class="field">
+              <label for="route-distance">Distancia (km)</label>
+              <input id="route-distance" type="number" step="1" min="1" readonly placeholder="Auto" />
+            </div>
+            <div class="field">
+              <label for="route-cost">Costo base (USD)</label>
+              <input id="route-cost" type="number" step="0.01" min="0" />
+            </div>
+          </div>
+          <div class="field-grid">
+            <div class="field">
+              <label for="route-stay">Estancia (h)</label>
+              <input id="route-stay" type="number" step="0.5" min="0" />
+            </div>
+            <div class="field">
+              <label for="route-aircraft">Aeronaves</label>
+              <input id="route-aircraft" type="text" placeholder="Avion Comercial" />
+            </div>
+          </div>
+          <details>
+            <summary>Nuevo aeropuerto</summary>
+            <div class="node-grid">
+              <div class="field">
+                <label for="origin-hub">Tipo</label>
+                <select id="origin-hub">
+                  <option value="true">Hub</option>
+                  <option value="false">Secundario</option>
                 </select>
               </div>
               <div class="field">
-                <label for="search-origin-country">Pais origen</label>
-                <input id="search-origin-country" type="text" list="search-origin-suggestions"
-                  placeholder="Ej: Colombia" autocomplete="off" />
-                <datalist id="search-origin-suggestions"></datalist>
+                <label for="origin-lodging">Alojamiento ($)</label>
+                <input id="origin-lodging" type="number" step="0.01" min="0" />
               </div>
-              <div class="field">
-                <label for="search-destination-country">Pais destino</label>
-                <input id="search-destination-country" type="text" list="search-destination-suggestions"
-                  placeholder="Ej: Peru" autocomplete="off" />
-                <datalist id="search-destination-suggestions"></datalist>
-              </div>
-              <div class="field-grid">
-                <div class="field">
-                  <label for="search-budget">Presupuesto total (USD)</label>
-                  <input id="search-budget" type="number" step="0.01" min="0" />
-                </div>
-                <div class="field">
-                  <label for="search-aircraft">Aeronaves permitidas (coma)</label>
-                  <input id="search-aircraft" type="text" placeholder="A320, B737" />
-                </div>
-              </div>
-              <div class="field-grid">
-                <div class="field">
-                  <label for="search-time">Tiempo maximo (min)</label>
-                  <input id="search-time" type="number" step="1" min="0" />
-                </div>
-                <div class="field">
-                  <label for="search-secondary">Excluir secundarios</label>
-                  <select id="search-secondary">
-                    <option value="false" selected>Permitir</option>
-                    <option value="true">Excluir</option>
-                  </select>
-                </div>
-              </div>
-              <div class="checkbox-row">
-                <label><input id="search-lodging" type="checkbox" checked /> Incluir alojamiento</label>
-                <label><input id="search-food" type="checkbox" checked /> Incluir alimentacion</label>
-                <label><input id="search-work" type="checkbox" checked /> Incluir trabajos</label>
-              </div>
-              <button class="primary" type="submit">Buscar ruta</button>
-            </form>
-          </div>
-          <div class="panel-block">
-            <h2>Viaje interactivo (2.3)</h2>
-            <form id="trip-form" class="route-form">
-              <div class="field">
-                <label for="trip-origin">Pais origen</label>
-                <input id="trip-origin" type="text" list="trip-origin-suggestions"
-                  placeholder="Ej: Colombia" autocomplete="off" />
-                <datalist id="trip-origin-suggestions"></datalist>
-              </div>
-              <div class="field">
-                <label for="trip-budget">Presupuesto inicial (USD)</label>
-                <input id="trip-budget" type="number" step="0.01" min="1" value="1000" />
-              </div>
-              <button class="primary" type="submit">Iniciar viaje</button>
-            </form>
-            <div id="trip-panel" class="hidden">
-              <hr class="divider" />
-              <div id="trip-status" class="trip-status"></div>
-              <div id="trip-actions" class="trip-actions"></div>
-              <div id="trip-report" class="trip-report hidden"></div>
             </div>
-          </div>
-          <div class="panel-block">
-            <h2>Agregar ruta</h2>
-            <form id="route-form" class="route-form">
-              <div class="field">
-                <label for="origin-country">Pais origen</label>
-                <input id="origin-country" type="text" list="origin-suggestions" placeholder="Ej: Colombia"
-                  autocomplete="off" />
-                <datalist id="origin-suggestions"></datalist>
-              </div>
-              <div class="field">
-                <label for="destination-country">Pais destino</label>
-                <input id="destination-country" type="text" list="destination-suggestions" placeholder="Ej: Peru"
-                  autocomplete="off" />
-                <datalist id="destination-suggestions"></datalist>
-              </div>
-
-              <div class="field-grid">
-                <div class="field">
-                  <label for="route-distance">Distancia (km)</label>
-                  <input id="route-distance" type="number" step="1" min="1" placeholder="Auto" readonly />
-                </div>
-                <div class="field">
-                  <label for="route-cost">Costo base (USD)</label>
-                  <input id="route-cost" type="number" step="0.01" min="0" />
-                </div>
-              </div>
-              <div class="field-grid">
-                <div class="field">
-                  <label for="route-stay">Estancia minima (min)</label>
-                  <input id="route-stay" type="number" step="1" min="0" />
-                </div>
-                <div class="field">
-                  <label for="route-aircraft">Aeronaves (coma)</label>
-                  <input id="route-aircraft" type="text" placeholder="A320, B737" />
-                </div>
-              </div>
-
-              <details id="origin-node-section" class="node-section">
-                <summary>Datos pais origen (si no existe)</summary>
-                <div class="node-grid">
-                  <div class="field">
-                    <label for="origin-hub">Tipo</label>
-                    <select id="origin-hub">
-                      <option value="true">Hub</option>
-                      <option value="false">Secundario</option>
-                    </select>
-                  </div>
-                  <div class="field">
-                    <label for="origin-lodging">Costo alojamiento</label>
-                    <input id="origin-lodging" type="number" step="0.01" min="0" />
-                  </div>
-                </div>
-                <div class="list-block">
-                  <div class="list-header">
-                    <span>Actividades</span>
-                    <button type="button" class="ghost" data-add-activity="origin">
-                      Agregar actividad
-                    </button>
-                  </div>
-                  <div id="origin-activities" class="list-container"></div>
-                </div>
-                <div class="list-block">
-                  <div class="list-header">
-                    <span>Trabajos</span>
-                    <button type="button" class="ghost" data-add-job="origin">
-                      Agregar trabajo
-                    </button>
-                  </div>
-                  <div id="origin-jobs" class="list-container"></div>
-                </div>
-              </details>
-
-              <details id="destination-node-section" class="node-section">
-                <summary>Datos pais destino (si no existe)</summary>
-                <div class="node-grid">
-                  <div class="field">
-                    <label for="destination-hub">Tipo</label>
-                    <select id="destination-hub">
-                      <option value="true">Hub</option>
-                      <option value="false">Secundario</option>
-                    </select>
-                  </div>
-                  <div class="field">
-                    <label for="destination-lodging">Costo alojamiento</label>
-                    <input id="destination-lodging" type="number" step="0.01" min="0" />
-                  </div>
-                </div>
-                <div class="list-block">
-                  <div class="list-header">
-                    <span>Actividades</span>
-                    <button type="button" class="ghost" data-add-activity="destination">
-                      Agregar actividad
-                    </button>
-                  </div>
-                  <div id="destination-activities" class="list-container"></div>
-                </div>
-                <div class="list-block">
-                  <div class="list-header">
-                    <span>Trabajos</span>
-                    <button type="button" class="ghost" data-add-job="destination">
-                      Agregar trabajo
-                    </button>
-                  </div>
-                  <div id="destination-jobs" class="list-container"></div>
-                </div>
-              </details>
-
-              <button class="primary" type="submit">Agregar ruta</button>
-            </form>
-          </div>
-        </div>
-      </aside>
-    </main>
+          </details>
+          <button class="primary" type="submit">Agregar</button>
+        </form>
+      </div>
+    </aside>
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"

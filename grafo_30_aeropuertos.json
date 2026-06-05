@@ -1,0 +1,2836 @@
+{
+  "configuracion": {
+    "aeronaves": {
+      "Avion Comercial": {
+        "costoKm": 0.18,
+        "tiempoKm": 0.12
+      },
+      "Avion Regional": {
+        "costoKm": 0.25,
+        "tiempoKm": 0.7
+      },
+      "Helice": {
+        "costoKm": 1.1,
+        "tiempoKm": 2.5
+      }
+    },
+    "presupuestoMinimoPorc": 35,
+    "intervaloAlojamiento": 20,
+    "intervaloAlimentacion": 8
+  },
+  "nodos": [
+    {
+      "id": "BOG",
+      "nombre": "El Dorado",
+      "ciudad": "Bogota",
+      "pais": "Colombia",
+      "zonaHoraria": "America/Bogota",
+      "esHub": true,
+      "costoAlojamiento": 80,
+      "costoAlimentacion": 15,
+      "actividades": [
+        {
+          "nombre": "Tour por Bogota",
+          "tipo": "opcional",
+          "duracionMin": 120,
+          "costoUSD": 24
+        },
+        {
+          "nombre": "Museo de Bogota",
+          "tipo": "opcional",
+          "duracionMin": 90,
+          "costoUSD": 16
+        }
+      ],
+      "trabajos": [
+        {
+          "nombre": "Cargador de equipaje",
+          "tarifaHora": 12,
+          "maxHoras": 6
+        },
+        {
+          "nombre": "Asistente de rampa",
+          "tarifaHora": 14,
+          "maxHoras": 8
+        }
+      ],
+      "lat": 4.7022,
+      "lon": -74.1469
+    },
+    {
+      "id": "MDE",
+      "nombre": "Jose Maria Cordova",
+      "ciudad": "Medellin",
+      "pais": "Colombia",
+      "zonaHoraria": "America/Bogota",
+      "esHub": false,
+      "costoAlojamiento": 65,
+      "costoAlimentacion": 12,
+      "actividades": [
+        {
+          "nombre": "Visita guiada Medellin",
+          "tipo": "opcional",
+          "duracionMin": 60,
+          "costoUSD": 13
+        }
+      ],
+      "trabajos": [
+        {
+          "nombre": "Limpieza",
+          "tarifaHora": 8,
+          "maxHoras": 6
+        }
+      ],
+      "lat": 6.1678,
+      "lon": -75.4268
+    },
+    {
+      "id": "BAQ",
+      "nombre": "Ernesto Cortissoz",
+      "ciudad": "Barranquilla",
+      "pais": "Colombia",
+      "zonaHoraria": "America/Bogota",
+      "esHub": false,
+      "costoAlojamiento": 50,
+      "costoAlimentacion": 10,
+      "actividades": [
+        {
+          "nombre": "Visita guiada Barranquilla",
+          "tipo": "opcional",
+          "duracionMin": 60,
+          "costoUSD": 10
+        }
+      ],
+      "trabajos": [
+        {
+          "nombre": "Limpieza",
+          "tarifaHora": 6,
+          "maxHoras": 6
+        }
+      ],
+      "lat": 10.8896,
+      "lon": -74.7808
+    },
+    {
+      "id": "CTG",
+      "nombre": "Rafael Nunez",
+      "ciudad": "Cartagena",
+      "pais": "Colombia",
+      "zonaHoraria": "America/Bogota",
+      "esHub": false,
+      "costoAlojamiento": 70,
+      "costoAlimentacion": 14,
+      "actividades": [
+        {
+          "nombre": "Visita guiada Cartagena",
+          "tipo": "opcional",
+          "duracionMin": 60,
+          "costoUSD": 14
+        }
+      ],
+      "trabajos": [
+        {
+          "nombre": "Limpieza",
+          "tarifaHora": 8,
+          "maxHoras": 6
+        }
+      ],
+      "lat": 10.4425,
+      "lon": -75.513
+    },
+    {
+      "id": "LIM",
+      "nombre": "Jorge Chavez",
+      "ciudad": "Lima",
+      "pais": "Peru",
+      "zonaHoraria": "America/Lima",
+      "esHub": true,
+      "costoAlojamiento": 90,
+      "costoAlimentacion": 16,
+      "actividades": [
+        {
+          "nombre": "Tour por Lima",
+          "tipo": "opcional",
+          "duracionMin": 120,
+          "costoUSD": 27
+        },
+        {
+          "nombre": "Museo de Lima",
+          "tipo": "opcional",
+          "duracionMin": 90,
+          "costoUSD": 18
+        }
+      ],
+      "trabajos": [
+        {
+          "nombre": "Cargador de equipaje",
+          "tarifaHora": 14,
+          "maxHoras": 6
+        },
+        {
+          "nombre": "Asistente de rampa",
+          "tarifaHora": 16,
+          "maxHoras": 8
+        }
+      ],
+      "lat": -12.0219,
+      "lon": -77.1085
+    },
+    {
+      "id": "CUZ",
+      "nombre": "Alejandro Velasco Astete",
+      "ciudad": "Cusco",
+      "pais": "Peru",
+      "zonaHoraria": "America/Lima",
+      "esHub": false,
+      "costoAlojamiento": 50,
+      "costoAlimentacion": 10,
+      "actividades": [
+        {
+          "nombre": "Visita guiada Cusco",
+          "tipo": "opcional",
+          "duracionMin": 60,
+          "costoUSD": 10
+        }
+      ],
+      "trabajos": [
+        {
+          "nombre": "Limpieza",
+          "tarifaHora": 6,
+          "maxHoras": 6
+        }
+      ],
+      "lat": -13.5358,
+      "lon": -71.9386
+    },
+    {
+      "id": "SCL",
+      "nombre": "Arturo Merino Benitez",
+      "ciudad": "Santiago",
+      "pais": "Chile",
+      "zonaHoraria": "America/Santiago",
+      "esHub": true,
+      "costoAlojamiento": 100,
+      "costoAlimentacion": 18,
+      "actividades": [
+        {
+          "nombre": "Tour por Santiago",
+          "tipo": "opcional",
+          "duracionMin": 120,
+          "costoUSD": 30
+        },
+        {
+          "nombre": "Museo de Santiago",
+          "tipo": "opcional",
+          "duracionMin": 90,
+          "costoUSD": 20
+        }
+      ],
+      "trabajos": [
+        {
+          "nombre": "Cargador de equipaje",
+          "tarifaHora": 15,
+          "maxHoras": 6
+        },
+        {
+          "nombre": "Asistente de rampa",
+          "tarifaHora": 18,
+          "maxHoras": 8
+        }
+      ],
+      "lat": -33.3928,
+      "lon": -70.7942
+    },
+    {
+      "id": "EZE",
+      "nombre": "Ministro Pistarini",
+      "ciudad": "Buenos Aires",
+      "pais": "Argentina",
+      "zonaHoraria": "America/Argentina/Buenos_Aires",
+      "esHub": true,
+      "costoAlojamiento": 110,
+      "costoAlimentacion": 20,
+      "actividades": [
+        {
+          "nombre": "Tour por Buenos Aires",
+          "tipo": "opcional",
+          "duracionMin": 120,
+          "costoUSD": 33
+        },
+        {
+          "nombre": "Museo de Buenos Aires",
+          "tipo": "opcional",
+          "duracionMin": 90,
+          "costoUSD": 22
+        }
+      ],
+      "trabajos": [
+        {
+          "nombre": "Cargador de equipaje",
+          "tarifaHora": 16,
+          "maxHoras": 6
+        },
+        {
+          "nombre": "Asistente de rampa",
+          "tarifaHora": 20,
+          "maxHoras": 8
+        }
+      ],
+      "lat": -34.8222,
+      "lon": -58.5358
+    },
+    {
+      "id": "AEP",
+      "nombre": "Aeroparque",
+      "ciudad": "Buenos Aires",
+      "pais": "Argentina",
+      "zonaHoraria": "America/Argentina/Buenos_Aires",
+      "esHub": false,
+      "costoAlojamiento": 85,
+      "costoAlimentacion": 16,
+      "actividades": [
+        {
+          "nombre": "Visita guiada Buenos Aires",
+          "tipo": "opcional",
+          "duracionMin": 60,
+          "costoUSD": 17
+        }
+      ],
+      "trabajos": [
+        {
+          "nombre": "Limpieza",
+          "tarifaHora": 10,
+          "maxHoras": 6
+        }
+      ],
+      "lat": -34.5625,
+      "lon": -58.4156
+    },
+    {
+      "id": "COR",
+      "nombre": "Ingeniero Aeronautico Taravella",
+      "ciudad": "Cordoba",
+      "pais": "Argentina",
+      "zonaHoraria": "America/Argentina/Cordoba",
+      "esHub": false,
+      "costoAlojamiento": 60,
+      "costoAlimentacion": 12,
+      "actividades": [
+        {
+          "nombre": "Visita guiada Cordoba",
+          "tipo": "opcional",
+          "duracionMin": 60,
+          "costoUSD": 12
+        }
+      ],
+      "trabajos": [
+        {
+          "nombre": "Limpieza",
+          "tarifaHora": 7,
+          "maxHoras": 6
+        }
+      ],
+      "lat": -31.3236,
+      "lon": -64.208
+    },
+    {
+      "id": "GRU",
+      "nombre": "Guarulhos",
+      "ciudad": "Sao Paulo",
+      "pais": "Brasil",
+      "zonaHoraria": "America/Sao_Paulo",
+      "esHub": true,
+      "costoAlojamiento": 120,
+      "costoAlimentacion": 22,
+      "actividades": [
+        {
+          "nombre": "Tour por Sao Paulo",
+          "tipo": "opcional",
+          "duracionMin": 120,
+          "costoUSD": 36
+        },
+        {
+          "nombre": "Museo de Sao Paulo",
+          "tipo": "opcional",
+          "duracionMin": 90,
+          "costoUSD": 24
+        }
+      ],
+      "trabajos": [
+        {
+          "nombre": "Cargador de equipaje",
+          "tarifaHora": 18,
+          "maxHoras": 6
+        },
+        {
+          "nombre": "Asistente de rampa",
+          "tarifaHora": 22,
+          "maxHoras": 8
+        }
+      ],
+      "lat": -23.4356,
+      "lon": -46.4731
+    },
+    {
+      "id": "GIG",
+      "nombre": "Galeao",
+      "ciudad": "Rio de Janeiro",
+      "pais": "Brasil",
+      "zonaHoraria": "America/Sao_Paulo",
+      "esHub": true,
+      "costoAlojamiento": 130,
+      "costoAlimentacion": 24,
+      "actividades": [
+        {
+          "nombre": "Tour por Rio de Janeiro",
+          "tipo": "opcional",
+          "duracionMin": 120,
+          "costoUSD": 39
+        },
+        {
+          "nombre": "Museo de Rio de Janeiro",
+          "tipo": "opcional",
+          "duracionMin": 90,
+          "costoUSD": 26
+        }
+      ],
+      "trabajos": [
+        {
+          "nombre": "Cargador de equipaje",
+          "tarifaHora": 20,
+          "maxHoras": 6
+        },
+        {
+          "nombre": "Asistente de rampa",
+          "tarifaHora": 23,
+          "maxHoras": 8
+        }
+      ],
+      "lat": -22.8092,
+      "lon": -43.2506
+    },
+    {
+      "id": "BSB",
+      "nombre": "Presidente Juscelino Kubitschek",
+      "ciudad": "Brasilia",
+      "pais": "Brasil",
+      "zonaHoraria": "America/Sao_Paulo",
+      "esHub": false,
+      "costoAlojamiento": 95,
+      "costoAlimentacion": 18,
+      "actividades": [
+        {
+          "nombre": "Visita guiada Brasilia",
+          "tipo": "opcional",
+          "duracionMin": 60,
+          "costoUSD": 19
+        }
+      ],
+      "trabajos": [
+        {
+          "nombre": "Limpieza",
+          "tarifaHora": 11,
+          "maxHoras": 6
+        }
+      ],
+      "lat": -15.8711,
+      "lon": -47.9186
+    },
+    {
+      "id": "POA",
+      "nombre": "Salgado Filho",
+      "ciudad": "Porto Alegre",
+      "pais": "Brasil",
+      "zonaHoraria": "America/Sao_Paulo",
+      "esHub": false,
+      "costoAlojamiento": 70,
+      "costoAlimentacion": 14,
+      "actividades": [
+        {
+          "nombre": "Visita guiada Porto Alegre",
+          "tipo": "opcional",
+          "duracionMin": 60,
+          "costoUSD": 14
+        }
+      ],
+      "trabajos": [
+        {
+          "nombre": "Limpieza",
+          "tarifaHora": 8,
+          "maxHoras": 6
+        }
+      ],
+      "lat": -29.9944,
+      "lon": -51.1714
+    },
+    {
+      "id": "MAO",
+      "nombre": "Eduardo Gomes",
+      "ciudad": "Manaus",
+      "pais": "Brasil",
+      "zonaHoraria": "America/Manaus",
+      "esHub": false,
+      "costoAlojamiento": 80,
+      "costoAlimentacion": 15,
+      "actividades": [
+        {
+          "nombre": "Visita guiada Manaus",
+          "tipo": "opcional",
+          "duracionMin": 60,
+          "costoUSD": 16
+        }
+      ],
+      "trabajos": [
+        {
+          "nombre": "Limpieza",
+          "tarifaHora": 10,
+          "maxHoras": 6
+        }
+      ],
+      "lat": -3.0389,
+      "lon": -60.0506
+    },
+    {
+      "id": "UIO",
+      "nombre": "Mariscal Sucre",
+      "ciudad": "Quito",
+      "pais": "Ecuador",
+      "zonaHoraria": "America/Guayaquil",
+      "esHub": false,
+      "costoAlojamiento": 75,
+      "costoAlimentacion": 14,
+      "actividades": [
+        {
+          "nombre": "Visita guiada Quito",
+          "tipo": "opcional",
+          "duracionMin": 60,
+          "costoUSD": 15
+        }
+      ],
+      "trabajos": [
+        {
+          "nombre": "Limpieza",
+          "tarifaHora": 9,
+          "maxHoras": 6
+        }
+      ],
+      "lat": -0.1292,
+      "lon": -78.3575
+    },
+    {
+      "id": "GYE",
+      "nombre": "Jose Joaquin de Olmedo",
+      "ciudad": "Guayaquil",
+      "pais": "Ecuador",
+      "zonaHoraria": "America/Guayaquil",
+      "esHub": false,
+      "costoAlojamiento": 65,
+      "costoAlimentacion": 12,
+      "actividades": [
+        {
+          "nombre": "Visita guiada Guayaquil",
+          "tipo": "opcional",
+          "duracionMin": 60,
+          "costoUSD": 13
+        }
+      ],
+      "trabajos": [
+        {
+          "nombre": "Limpieza",
+          "tarifaHora": 8,
+          "maxHoras": 6
+        }
+      ],
+      "lat": -2.1575,
+      "lon": -79.8836
+    },
+    {
+      "id": "CCS",
+      "nombre": "Simon Bolivar",
+      "ciudad": "Caracas",
+      "pais": "Venezuela",
+      "zonaHoraria": "America/Caracas",
+      "esHub": true,
+      "costoAlojamiento": 85,
+      "costoAlimentacion": 16,
+      "actividades": [
+        {
+          "nombre": "Tour por Caracas",
+          "tipo": "opcional",
+          "duracionMin": 120,
+          "costoUSD": 26
+        },
+        {
+          "nombre": "Museo de Caracas",
+          "tipo": "opcional",
+          "duracionMin": 90,
+          "costoUSD": 17
+        }
+      ],
+      "trabajos": [
+        {
+          "nombre": "Cargador de equipaje",
+          "tarifaHora": 13,
+          "maxHoras": 6
+        },
+        {
+          "nombre": "Asistente de rampa",
+          "tarifaHora": 15,
+          "maxHoras": 8
+        }
+      ],
+      "lat": 10.6012,
+      "lon": -66.9917
+    },
+    {
+      "id": "VVI",
+      "nombre": "Viru Viru",
+      "ciudad": "Santa Cruz",
+      "pais": "Bolivia",
+      "zonaHoraria": "America/La_Paz",
+      "esHub": false,
+      "costoAlojamiento": 55,
+      "costoAlimentacion": 11,
+      "actividades": [
+        {
+          "nombre": "Visita guiada Santa Cruz",
+          "tipo": "opcional",
+          "duracionMin": 60,
+          "costoUSD": 11
+        }
+      ],
+      "trabajos": [
+        {
+          "nombre": "Limpieza",
+          "tarifaHora": 7,
+          "maxHoras": 6
+        }
+      ],
+      "lat": -17.6421,
+      "lon": -63.1353
+    },
+    {
+      "id": "LPB",
+      "nombre": "El Alto",
+      "ciudad": "La Paz",
+      "pais": "Bolivia",
+      "zonaHoraria": "America/La_Paz",
+      "esHub": false,
+      "costoAlojamiento": 50,
+      "costoAlimentacion": 10,
+      "actividades": [
+        {
+          "nombre": "Visita guiada La Paz",
+          "tipo": "opcional",
+          "duracionMin": 60,
+          "costoUSD": 10
+        }
+      ],
+      "trabajos": [
+        {
+          "nombre": "Limpieza",
+          "tarifaHora": 6,
+          "maxHoras": 6
+        }
+      ],
+      "lat": -16.5133,
+      "lon": -68.1923
+    },
+    {
+      "id": "MVD",
+      "nombre": "Carrasco",
+      "ciudad": "Montevideo",
+      "pais": "Uruguay",
+      "zonaHoraria": "America/Montevideo",
+      "esHub": false,
+      "costoAlojamiento": 85,
+      "costoAlimentacion": 16,
+      "actividades": [
+        {
+          "nombre": "Visita guiada Montevideo",
+          "tipo": "opcional",
+          "duracionMin": 60,
+          "costoUSD": 17
+        }
+      ],
+      "trabajos": [
+        {
+          "nombre": "Limpieza",
+          "tarifaHora": 10,
+          "maxHoras": 6
+        }
+      ],
+      "lat": -34.7886,
+      "lon": -56.2528
+    },
+    {
+      "id": "MEX",
+      "nombre": "Benito Juarez",
+      "ciudad": "Ciudad de Mexico",
+      "pais": "Mexico",
+      "zonaHoraria": "America/Mexico_City",
+      "esHub": true,
+      "costoAlojamiento": 95,
+      "costoAlimentacion": 17,
+      "actividades": [
+        {
+          "nombre": "Tour por Ciudad de Mexico",
+          "tipo": "opcional",
+          "duracionMin": 120,
+          "costoUSD": 28
+        },
+        {
+          "nombre": "Museo de Ciudad de Mexico",
+          "tipo": "opcional",
+          "duracionMin": 90,
+          "costoUSD": 19
+        }
+      ],
+      "trabajos": [
+        {
+          "nombre": "Cargador de equipaje",
+          "tarifaHora": 14,
+          "maxHoras": 6
+        },
+        {
+          "nombre": "Asistente de rampa",
+          "tarifaHora": 17,
+          "maxHoras": 8
+        }
+      ],
+      "lat": 19.4326,
+      "lon": -99.0072
+    },
+    {
+      "id": "CUN",
+      "nombre": "Cancun",
+      "ciudad": "Cancun",
+      "pais": "Mexico",
+      "zonaHoraria": "America/Cancun",
+      "esHub": true,
+      "costoAlojamiento": 110,
+      "costoAlimentacion": 20,
+      "actividades": [
+        {
+          "nombre": "Tour por Cancun",
+          "tipo": "opcional",
+          "duracionMin": 120,
+          "costoUSD": 33
+        },
+        {
+          "nombre": "Museo de Cancun",
+          "tipo": "opcional",
+          "duracionMin": 90,
+          "costoUSD": 22
+        }
+      ],
+      "trabajos": [
+        {
+          "nombre": "Cargador de equipaje",
+          "tarifaHora": 16,
+          "maxHoras": 6
+        },
+        {
+          "nombre": "Asistente de rampa",
+          "tarifaHora": 20,
+          "maxHoras": 8
+        }
+      ],
+      "lat": 21.0365,
+      "lon": -86.8771
+    },
+    {
+      "id": "GDL",
+      "nombre": "Miguel Hidalgo",
+      "ciudad": "Guadalajara",
+      "pais": "Mexico",
+      "zonaHoraria": "America/Mexico_City",
+      "esHub": false,
+      "costoAlojamiento": 75,
+      "costoAlimentacion": 14,
+      "actividades": [
+        {
+          "nombre": "Visita guiada Guadalajara",
+          "tipo": "opcional",
+          "duracionMin": 60,
+          "costoUSD": 15
+        }
+      ],
+      "trabajos": [
+        {
+          "nombre": "Limpieza",
+          "tarifaHora": 9,
+          "maxHoras": 6
+        }
+      ],
+      "lat": 20.5218,
+      "lon": -103.3112
+    },
+    {
+      "id": "MIA",
+      "nombre": "Miami International",
+      "ciudad": "Miami",
+      "pais": "Estados Unidos",
+      "zonaHoraria": "America/New_York",
+      "esHub": true,
+      "costoAlojamiento": 120,
+      "costoAlimentacion": 20,
+      "actividades": [
+        {
+          "nombre": "Tour por Miami",
+          "tipo": "opcional",
+          "duracionMin": 120,
+          "costoUSD": 36
+        },
+        {
+          "nombre": "Museo de Miami",
+          "tipo": "opcional",
+          "duracionMin": 90,
+          "costoUSD": 24
+        }
+      ],
+      "trabajos": [
+        {
+          "nombre": "Cargador de equipaje",
+          "tarifaHora": 18,
+          "maxHoras": 6
+        },
+        {
+          "nombre": "Asistente de rampa",
+          "tarifaHora": 22,
+          "maxHoras": 8
+        }
+      ],
+      "lat": 25.7959,
+      "lon": -80.287
+    },
+    {
+      "id": "JFK",
+      "nombre": "John F. Kennedy",
+      "ciudad": "Nueva York",
+      "pais": "Estados Unidos",
+      "zonaHoraria": "America/New_York",
+      "esHub": true,
+      "costoAlojamiento": 150,
+      "costoAlimentacion": 25,
+      "actividades": [
+        {
+          "nombre": "Tour por Nueva York",
+          "tipo": "opcional",
+          "duracionMin": 120,
+          "costoUSD": 45
+        },
+        {
+          "nombre": "Museo de Nueva York",
+          "tipo": "opcional",
+          "duracionMin": 90,
+          "costoUSD": 30
+        }
+      ],
+      "trabajos": [
+        {
+          "nombre": "Cargador de equipaje",
+          "tarifaHora": 22,
+          "maxHoras": 6
+        },
+        {
+          "nombre": "Asistente de rampa",
+          "tarifaHora": 27,
+          "maxHoras": 8
+        }
+      ],
+      "lat": 40.6413,
+      "lon": -73.7781
+    },
+    {
+      "id": "LAX",
+      "nombre": "Los Angeles",
+      "ciudad": "Los Angeles",
+      "pais": "Estados Unidos",
+      "zonaHoraria": "America/Los_Angeles",
+      "esHub": true,
+      "costoAlojamiento": 130,
+      "costoAlimentacion": 22,
+      "actividades": [
+        {
+          "nombre": "Tour por Los Angeles",
+          "tipo": "opcional",
+          "duracionMin": 120,
+          "costoUSD": 39
+        },
+        {
+          "nombre": "Museo de Los Angeles",
+          "tipo": "opcional",
+          "duracionMin": 90,
+          "costoUSD": 26
+        }
+      ],
+      "trabajos": [
+        {
+          "nombre": "Cargador de equipaje",
+          "tarifaHora": 20,
+          "maxHoras": 6
+        },
+        {
+          "nombre": "Asistente de rampa",
+          "tarifaHora": 23,
+          "maxHoras": 8
+        }
+      ],
+      "lat": 33.9425,
+      "lon": -118.4081
+    },
+    {
+      "id": "SFO",
+      "nombre": "San Francisco",
+      "ciudad": "San Francisco",
+      "pais": "Estados Unidos",
+      "zonaHoraria": "America/Los_Angeles",
+      "esHub": false,
+      "costoAlojamiento": 140,
+      "costoAlimentacion": 24,
+      "actividades": [
+        {
+          "nombre": "Visita guiada San Francisco",
+          "tipo": "opcional",
+          "duracionMin": 60,
+          "costoUSD": 28
+        }
+      ],
+      "trabajos": [
+        {
+          "nombre": "Limpieza",
+          "tarifaHora": 17,
+          "maxHoras": 6
+        }
+      ],
+      "lat": 37.6213,
+      "lon": -122.379
+    },
+    {
+      "id": "IAD",
+      "nombre": "Washington Dulles",
+      "ciudad": "Washington DC",
+      "pais": "Estados Unidos",
+      "zonaHoraria": "America/New_York",
+      "esHub": false,
+      "costoAlojamiento": 130,
+      "costoAlimentacion": 22,
+      "actividades": [
+        {
+          "nombre": "Visita guiada Washington DC",
+          "tipo": "opcional",
+          "duracionMin": 60,
+          "costoUSD": 26
+        }
+      ],
+      "trabajos": [
+        {
+          "nombre": "Limpieza",
+          "tarifaHora": 16,
+          "maxHoras": 6
+        }
+      ],
+      "lat": 38.9531,
+      "lon": -77.4565
+    },
+    {
+      "id": "ORD",
+      "nombre": "O'Hare",
+      "ciudad": "Chicago",
+      "pais": "Estados Unidos",
+      "zonaHoraria": "America/Chicago",
+      "esHub": true,
+      "costoAlojamiento": 140,
+      "costoAlimentacion": 23,
+      "actividades": [
+        {
+          "nombre": "Tour por Chicago",
+          "tipo": "opcional",
+          "duracionMin": 120,
+          "costoUSD": 42
+        },
+        {
+          "nombre": "Museo de Chicago",
+          "tipo": "opcional",
+          "duracionMin": 90,
+          "costoUSD": 28
+        }
+      ],
+      "trabajos": [
+        {
+          "nombre": "Cargador de equipaje",
+          "tarifaHora": 21,
+          "maxHoras": 6
+        },
+        {
+          "nombre": "Asistente de rampa",
+          "tarifaHora": 25,
+          "maxHoras": 8
+        }
+      ],
+      "lat": 41.9742,
+      "lon": -87.9073
+    },
+    {
+      "id": "HAV",
+      "nombre": "Jose Marti",
+      "ciudad": "La Habana",
+      "pais": "Cuba",
+      "zonaHoraria": "America/Havana",
+      "esHub": false,
+      "costoAlojamiento": 70,
+      "costoAlimentacion": 14,
+      "actividades": [
+        {
+          "nombre": "Visita guiada La Habana",
+          "tipo": "opcional",
+          "duracionMin": 60,
+          "costoUSD": 14
+        }
+      ],
+      "trabajos": [
+        {
+          "nombre": "Limpieza",
+          "tarifaHora": 8,
+          "maxHoras": 6
+        }
+      ],
+      "lat": 22.9892,
+      "lon": -82.4091
+    },
+    {
+      "id": "SDQ",
+      "nombre": "Las Americas",
+      "ciudad": "Santo Domingo",
+      "pais": "Republica Dominicana",
+      "zonaHoraria": "America/Santo_Domingo",
+      "esHub": false,
+      "costoAlojamiento": 85,
+      "costoAlimentacion": 16,
+      "actividades": [
+        {
+          "nombre": "Visita guiada Santo Domingo",
+          "tipo": "opcional",
+          "duracionMin": 60,
+          "costoUSD": 17
+        }
+      ],
+      "trabajos": [
+        {
+          "nombre": "Limpieza",
+          "tarifaHora": 10,
+          "maxHoras": 6
+        }
+      ],
+      "lat": 18.4297,
+      "lon": -69.6689
+    },
+    {
+      "id": "SJU",
+      "nombre": "Luis Munoz Marin",
+      "ciudad": "San Juan",
+      "pais": "Puerto Rico",
+      "zonaHoraria": "America/Puerto_Rico",
+      "esHub": false,
+      "costoAlojamiento": 90,
+      "costoAlimentacion": 17,
+      "actividades": [
+        {
+          "nombre": "Visita guiada San Juan",
+          "tipo": "opcional",
+          "duracionMin": 60,
+          "costoUSD": 18
+        }
+      ],
+      "trabajos": [
+        {
+          "nombre": "Limpieza",
+          "tarifaHora": 11,
+          "maxHoras": 6
+        }
+      ],
+      "lat": 18.4394,
+      "lon": -66.0018
+    },
+    {
+      "id": "PTY",
+      "nombre": "Tocumen",
+      "ciudad": "Ciudad de Panama",
+      "pais": "Panama",
+      "zonaHoraria": "America/Panama",
+      "esHub": true,
+      "costoAlojamiento": 95,
+      "costoAlimentacion": 17,
+      "actividades": [
+        {
+          "nombre": "Tour por Ciudad de Panama",
+          "tipo": "opcional",
+          "duracionMin": 120,
+          "costoUSD": 28
+        },
+        {
+          "nombre": "Museo de Ciudad de Panama",
+          "tipo": "opcional",
+          "duracionMin": 90,
+          "costoUSD": 19
+        }
+      ],
+      "trabajos": [
+        {
+          "nombre": "Cargador de equipaje",
+          "tarifaHora": 14,
+          "maxHoras": 6
+        },
+        {
+          "nombre": "Asistente de rampa",
+          "tarifaHora": 17,
+          "maxHoras": 8
+        }
+      ],
+      "lat": 9.0712,
+      "lon": -79.3835
+    },
+    {
+      "id": "SJO",
+      "nombre": "Juan Santamaria",
+      "ciudad": "San Jose",
+      "pais": "Costa Rica",
+      "zonaHoraria": "America/Costa_Rica",
+      "esHub": false,
+      "costoAlojamiento": 75,
+      "costoAlimentacion": 14,
+      "actividades": [
+        {
+          "nombre": "Visita guiada San Jose",
+          "tipo": "opcional",
+          "duracionMin": 60,
+          "costoUSD": 15
+        }
+      ],
+      "trabajos": [
+        {
+          "nombre": "Limpieza",
+          "tarifaHora": 9,
+          "maxHoras": 6
+        }
+      ],
+      "lat": 9.9939,
+      "lon": -84.2088
+    },
+    {
+      "id": "SAL",
+      "nombre": "El Salvador",
+      "ciudad": "San Salvador",
+      "pais": "El Salvador",
+      "zonaHoraria": "America/El_Salvador",
+      "esHub": false,
+      "costoAlojamiento": 60,
+      "costoAlimentacion": 12,
+      "actividades": [
+        {
+          "nombre": "Visita guiada San Salvador",
+          "tipo": "opcional",
+          "duracionMin": 60,
+          "costoUSD": 12
+        }
+      ],
+      "trabajos": [
+        {
+          "nombre": "Limpieza",
+          "tarifaHora": 7,
+          "maxHoras": 6
+        }
+      ],
+      "lat": 13.4408,
+      "lon": -89.0557
+    },
+    {
+      "id": "GUA",
+      "nombre": "La Aurora",
+      "ciudad": "Guatemala",
+      "pais": "Guatemala",
+      "zonaHoraria": "America/Guatemala",
+      "esHub": false,
+      "costoAlojamiento": 65,
+      "costoAlimentacion": 13,
+      "actividades": [
+        {
+          "nombre": "Visita guiada Guatemala",
+          "tipo": "opcional",
+          "duracionMin": 60,
+          "costoUSD": 13
+        }
+      ],
+      "trabajos": [
+        {
+          "nombre": "Limpieza",
+          "tarifaHora": 8,
+          "maxHoras": 6
+        }
+      ],
+      "lat": 14.5833,
+      "lon": -90.5275
+    },
+    {
+      "id": "MAD",
+      "nombre": "Adolfo Suarez Barajas",
+      "ciudad": "Madrid",
+      "pais": "Espana",
+      "zonaHoraria": "Europe/Madrid",
+      "esHub": true,
+      "costoAlojamiento": 160,
+      "costoAlimentacion": 28,
+      "actividades": [
+        {
+          "nombre": "Tour por Madrid",
+          "tipo": "opcional",
+          "duracionMin": 120,
+          "costoUSD": 48
+        },
+        {
+          "nombre": "Museo de Madrid",
+          "tipo": "opcional",
+          "duracionMin": 90,
+          "costoUSD": 32
+        }
+      ],
+      "trabajos": [
+        {
+          "nombre": "Cargador de equipaje",
+          "tarifaHora": 24,
+          "maxHoras": 6
+        },
+        {
+          "nombre": "Asistente de rampa",
+          "tarifaHora": 29,
+          "maxHoras": 8
+        }
+      ],
+      "lat": 40.4725,
+      "lon": -3.5607
+    },
+    {
+      "id": "CDG",
+      "nombre": "Charles de Gaulle",
+      "ciudad": "Paris",
+      "pais": "Francia",
+      "zonaHoraria": "Europe/Paris",
+      "esHub": true,
+      "costoAlojamiento": 180,
+      "costoAlimentacion": 30,
+      "actividades": [
+        {
+          "nombre": "Tour por Paris",
+          "tipo": "opcional",
+          "duracionMin": 120,
+          "costoUSD": 54
+        },
+        {
+          "nombre": "Museo de Paris",
+          "tipo": "opcional",
+          "duracionMin": 90,
+          "costoUSD": 36
+        }
+      ],
+      "trabajos": [
+        {
+          "nombre": "Cargador de equipaje",
+          "tarifaHora": 27,
+          "maxHoras": 6
+        },
+        {
+          "nombre": "Asistente de rampa",
+          "tarifaHora": 32,
+          "maxHoras": 8
+        }
+      ],
+      "lat": 49.0097,
+      "lon": 2.5478
+    }
+  ],
+  "aristas": [
+    {
+      "origen": "BOG",
+      "destino": "MDE",
+      "distanciaKm": 216,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional",
+        "Helice"
+      ],
+      "costoBase": 0.0,
+      "estanciaMinima": 0.5
+    },
+    {
+      "origen": "BOG",
+      "destino": "BAQ",
+      "distanciaKm": 692,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional",
+        "Helice"
+      ],
+      "costoBase": 104,
+      "estanciaMinima": 0.9
+    },
+    {
+      "origen": "BOG",
+      "destino": "CTG",
+      "distanciaKm": 656,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional",
+        "Helice"
+      ],
+      "costoBase": 98,
+      "estanciaMinima": 0.8
+    },
+    {
+      "origen": "BOG",
+      "destino": "UIO",
+      "distanciaKm": 712,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional",
+        "Helice"
+      ],
+      "costoBase": 107,
+      "estanciaMinima": 0.9
+    },
+    {
+      "origen": "BOG",
+      "destino": "GYE",
+      "distanciaKm": 994,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 149,
+      "estanciaMinima": 1.2
+    },
+    {
+      "origen": "BOG",
+      "destino": "CCS",
+      "distanciaKm": 1025,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 154,
+      "estanciaMinima": 1.3
+    },
+    {
+      "origen": "MDE",
+      "destino": "CTG",
+      "distanciaKm": 475,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional",
+        "Helice"
+      ],
+      "costoBase": 71,
+      "estanciaMinima": 0.6
+    },
+    {
+      "origen": "MDE",
+      "destino": "BAQ",
+      "distanciaKm": 530,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional",
+        "Helice"
+      ],
+      "costoBase": 80,
+      "estanciaMinima": 0.7
+    },
+    {
+      "origen": "CTG",
+      "destino": "BAQ",
+      "distanciaKm": 94,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional",
+        "Helice"
+      ],
+      "costoBase": 0.0,
+      "estanciaMinima": 0.5
+    },
+    {
+      "origen": "LIM",
+      "destino": "CUZ",
+      "distanciaKm": 585,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional",
+        "Helice"
+      ],
+      "costoBase": 88,
+      "estanciaMinima": 0.7
+    },
+    {
+      "origen": "LIM",
+      "destino": "UIO",
+      "distanciaKm": 1330,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 200,
+      "estanciaMinima": 1.7
+    },
+    {
+      "origen": "LIM",
+      "destino": "GYE",
+      "distanciaKm": 1139,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 171,
+      "estanciaMinima": 1.4
+    },
+    {
+      "origen": "LIM",
+      "destino": "VVI",
+      "distanciaKm": 1626,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 244,
+      "estanciaMinima": 2.0
+    },
+    {
+      "origen": "LIM",
+      "destino": "SCL",
+      "distanciaKm": 2461,
+      "aeronaves": [
+        "Avion Comercial"
+      ],
+      "costoBase": 369,
+      "estanciaMinima": 3.1
+    },
+    {
+      "origen": "BOG",
+      "destino": "LIM",
+      "distanciaKm": 1888,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 283,
+      "estanciaMinima": 2.4
+    },
+    {
+      "origen": "LIM",
+      "destino": "MEX",
+      "distanciaKm": 4241,
+      "aeronaves": [
+        "Avion Comercial"
+      ],
+      "costoBase": 636,
+      "estanciaMinima": 5.3
+    },
+    {
+      "origen": "LIM",
+      "destino": "PTY",
+      "distanciaKm": 2359,
+      "aeronaves": [
+        "Avion Comercial"
+      ],
+      "costoBase": 354,
+      "estanciaMinima": 2.9
+    },
+    {
+      "origen": "SCL",
+      "destino": "EZE",
+      "distanciaKm": 1139,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 171,
+      "estanciaMinima": 1.4
+    },
+    {
+      "origen": "SCL",
+      "destino": "COR",
+      "distanciaKm": 660,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional",
+        "Helice"
+      ],
+      "costoBase": 99,
+      "estanciaMinima": 0.8
+    },
+    {
+      "origen": "SCL",
+      "destino": "MVD",
+      "distanciaKm": 1347,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 202,
+      "estanciaMinima": 1.7
+    },
+    {
+      "origen": "SCL",
+      "destino": "POA",
+      "distanciaKm": 1892,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 284,
+      "estanciaMinima": 2.4
+    },
+    {
+      "origen": "EZE",
+      "destino": "AEP",
+      "distanciaKm": 31,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional",
+        "Helice"
+      ],
+      "costoBase": 0.0,
+      "estanciaMinima": 0.5
+    },
+    {
+      "origen": "EZE",
+      "destino": "COR",
+      "distanciaKm": 656,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional",
+        "Helice"
+      ],
+      "costoBase": 98,
+      "estanciaMinima": 0.8
+    },
+    {
+      "origen": "EZE",
+      "destino": "MVD",
+      "distanciaKm": 208,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional",
+        "Helice"
+      ],
+      "costoBase": 0.0,
+      "estanciaMinima": 0.5
+    },
+    {
+      "origen": "EZE",
+      "destino": "POA",
+      "distanciaKm": 875,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 131,
+      "estanciaMinima": 1.1
+    },
+    {
+      "origen": "EZE",
+      "destino": "GRU",
+      "distanciaKm": 1722,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 258,
+      "estanciaMinima": 2.2
+    },
+    {
+      "origen": "AEP",
+      "destino": "COR",
+      "distanciaKm": 649,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional",
+        "Helice"
+      ],
+      "costoBase": 97,
+      "estanciaMinima": 0.8
+    },
+    {
+      "origen": "AEP",
+      "destino": "MVD",
+      "distanciaKm": 199,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional",
+        "Helice"
+      ],
+      "costoBase": 0.0,
+      "estanciaMinima": 0.5
+    },
+    {
+      "origen": "GRU",
+      "destino": "GIG",
+      "distanciaKm": 337,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional",
+        "Helice"
+      ],
+      "costoBase": 0.0,
+      "estanciaMinima": 0.5
+    },
+    {
+      "origen": "GRU",
+      "destino": "BSB",
+      "distanciaKm": 855,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 128,
+      "estanciaMinima": 1.1
+    },
+    {
+      "origen": "GRU",
+      "destino": "POA",
+      "distanciaKm": 866,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 130,
+      "estanciaMinima": 1.1
+    },
+    {
+      "origen": "GRU",
+      "destino": "MAO",
+      "distanciaKm": 2697,
+      "aeronaves": [
+        "Avion Comercial"
+      ],
+      "costoBase": 405,
+      "estanciaMinima": 3.4
+    },
+    {
+      "origen": "GRU",
+      "destino": "SCL",
+      "distanciaKm": 2615,
+      "aeronaves": [
+        "Avion Comercial"
+      ],
+      "costoBase": 392,
+      "estanciaMinima": 3.3
+    },
+    {
+      "origen": "GRU",
+      "destino": "EZE",
+      "distanciaKm": 1722,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 258,
+      "estanciaMinima": 2.2
+    },
+    {
+      "origen": "GIG",
+      "destino": "BSB",
+      "distanciaKm": 914,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 137,
+      "estanciaMinima": 1.1
+    },
+    {
+      "origen": "GIG",
+      "destino": "GRU",
+      "distanciaKm": 337,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional",
+        "Helice"
+      ],
+      "costoBase": 0.0,
+      "estanciaMinima": 0.5
+    },
+    {
+      "origen": "GIG",
+      "destino": "POA",
+      "distanciaKm": 1122,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 168,
+      "estanciaMinima": 1.4
+    },
+    {
+      "origen": "GIG",
+      "destino": "MVD",
+      "distanciaKm": 1835,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 275,
+      "estanciaMinima": 2.3
+    },
+    {
+      "origen": "BSB",
+      "destino": "MAO",
+      "distanciaKm": 1949,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 292,
+      "estanciaMinima": 2.4
+    },
+    {
+      "origen": "BSB",
+      "destino": "VVI",
+      "distanciaKm": 1632,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 245,
+      "estanciaMinima": 2.0
+    },
+    {
+      "origen": "BSB",
+      "destino": "GRU",
+      "distanciaKm": 855,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 128,
+      "estanciaMinima": 1.1
+    },
+    {
+      "origen": "BSB",
+      "destino": "GIG",
+      "distanciaKm": 914,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 137,
+      "estanciaMinima": 1.1
+    },
+    {
+      "origen": "MAO",
+      "destino": "CCS",
+      "distanciaKm": 1700,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 255,
+      "estanciaMinima": 2.1
+    },
+    {
+      "origen": "MAO",
+      "destino": "PTY",
+      "distanciaKm": 2531,
+      "aeronaves": [
+        "Avion Comercial"
+      ],
+      "costoBase": 380,
+      "estanciaMinima": 3.2
+    },
+    {
+      "origen": "MAO",
+      "destino": "VVI",
+      "distanciaKm": 1658,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 249,
+      "estanciaMinima": 2.1
+    },
+    {
+      "origen": "VVI",
+      "destino": "LPB",
+      "distanciaKm": 552,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional",
+        "Helice"
+      ],
+      "costoBase": 83,
+      "estanciaMinima": 0.7
+    },
+    {
+      "origen": "VVI",
+      "destino": "SCL",
+      "distanciaKm": 1911,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 287,
+      "estanciaMinima": 2.4
+    },
+    {
+      "origen": "VVI",
+      "destino": "BSB",
+      "distanciaKm": 1632,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 245,
+      "estanciaMinima": 2.0
+    },
+    {
+      "origen": "VVI",
+      "destino": "LIM",
+      "distanciaKm": 1626,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 244,
+      "estanciaMinima": 2.0
+    },
+    {
+      "origen": "LPB",
+      "destino": "VVI",
+      "distanciaKm": 552,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional",
+        "Helice"
+      ],
+      "costoBase": 83,
+      "estanciaMinima": 0.7
+    },
+    {
+      "origen": "LPB",
+      "destino": "LIM",
+      "distanciaKm": 1083,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 162,
+      "estanciaMinima": 1.4
+    },
+    {
+      "origen": "UIO",
+      "destino": "GYE",
+      "distanciaKm": 282,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional",
+        "Helice"
+      ],
+      "costoBase": 0.0,
+      "estanciaMinima": 0.5
+    },
+    {
+      "origen": "UIO",
+      "destino": "PTY",
+      "distanciaKm": 1029,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 154,
+      "estanciaMinima": 1.3
+    },
+    {
+      "origen": "UIO",
+      "destino": "BOG",
+      "distanciaKm": 712,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional",
+        "Helice"
+      ],
+      "costoBase": 107,
+      "estanciaMinima": 0.9
+    },
+    {
+      "origen": "GYE",
+      "destino": "UIO",
+      "distanciaKm": 282,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional",
+        "Helice"
+      ],
+      "costoBase": 0.0,
+      "estanciaMinima": 0.5
+    },
+    {
+      "origen": "GYE",
+      "destino": "LIM",
+      "distanciaKm": 1139,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 171,
+      "estanciaMinima": 1.4
+    },
+    {
+      "origen": "CCS",
+      "destino": "PTY",
+      "distanciaKm": 1368,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 205,
+      "estanciaMinima": 1.7
+    },
+    {
+      "origen": "CCS",
+      "destino": "MIA",
+      "distanciaKm": 2193,
+      "aeronaves": [
+        "Avion Comercial"
+      ],
+      "costoBase": 329,
+      "estanciaMinima": 2.7
+    },
+    {
+      "origen": "CCS",
+      "destino": "SDQ",
+      "distanciaKm": 917,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 138,
+      "estanciaMinima": 1.1
+    },
+    {
+      "origen": "CCS",
+      "destino": "SJU",
+      "distanciaKm": 878,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 132,
+      "estanciaMinima": 1.1
+    },
+    {
+      "origen": "MEX",
+      "destino": "CUN",
+      "distanciaKm": 1278,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 192,
+      "estanciaMinima": 1.6
+    },
+    {
+      "origen": "MEX",
+      "destino": "GDL",
+      "distanciaKm": 466,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional",
+        "Helice"
+      ],
+      "costoBase": 70,
+      "estanciaMinima": 0.6
+    },
+    {
+      "origen": "MEX",
+      "destino": "MIA",
+      "distanciaKm": 2045,
+      "aeronaves": [
+        "Avion Comercial"
+      ],
+      "costoBase": 307,
+      "estanciaMinima": 2.6
+    },
+    {
+      "origen": "MEX",
+      "destino": "PTY",
+      "distanciaKm": 2405,
+      "aeronaves": [
+        "Avion Comercial"
+      ],
+      "costoBase": 361,
+      "estanciaMinima": 3.0
+    },
+    {
+      "origen": "MEX",
+      "destino": "LAX",
+      "distanciaKm": 2505,
+      "aeronaves": [
+        "Avion Comercial"
+      ],
+      "costoBase": 376,
+      "estanciaMinima": 3.1
+    },
+    {
+      "origen": "MEX",
+      "destino": "SFO",
+      "distanciaKm": 3034,
+      "aeronaves": [
+        "Avion Comercial"
+      ],
+      "costoBase": 455,
+      "estanciaMinima": 3.8
+    },
+    {
+      "origen": "CUN",
+      "destino": "MIA",
+      "distanciaKm": 855,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 128,
+      "estanciaMinima": 1.1
+    },
+    {
+      "origen": "CUN",
+      "destino": "HAV",
+      "distanciaKm": 509,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional",
+        "Helice"
+      ],
+      "costoBase": 76,
+      "estanciaMinima": 0.6
+    },
+    {
+      "origen": "CUN",
+      "destino": "MEX",
+      "distanciaKm": 1278,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 192,
+      "estanciaMinima": 1.6
+    },
+    {
+      "origen": "CUN",
+      "destino": "PTY",
+      "distanciaKm": 1554,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 233,
+      "estanciaMinima": 1.9
+    },
+    {
+      "origen": "GDL",
+      "destino": "MEX",
+      "distanciaKm": 466,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional",
+        "Helice"
+      ],
+      "costoBase": 70,
+      "estanciaMinima": 0.6
+    },
+    {
+      "origen": "GDL",
+      "destino": "LAX",
+      "distanciaKm": 2106,
+      "aeronaves": [
+        "Avion Comercial"
+      ],
+      "costoBase": 316,
+      "estanciaMinima": 2.6
+    },
+    {
+      "origen": "GDL",
+      "destino": "SFO",
+      "distanciaKm": 2644,
+      "aeronaves": [
+        "Avion Comercial"
+      ],
+      "costoBase": 397,
+      "estanciaMinima": 3.3
+    },
+    {
+      "origen": "PTY",
+      "destino": "SJO",
+      "distanciaKm": 539,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional",
+        "Helice"
+      ],
+      "costoBase": 81,
+      "estanciaMinima": 0.7
+    },
+    {
+      "origen": "PTY",
+      "destino": "MIA",
+      "distanciaKm": 1862,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 279,
+      "estanciaMinima": 2.3
+    },
+    {
+      "origen": "PTY",
+      "destino": "BOG",
+      "distanciaKm": 755,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional",
+        "Helice"
+      ],
+      "costoBase": 113,
+      "estanciaMinima": 0.9
+    },
+    {
+      "origen": "PTY",
+      "destino": "MEX",
+      "distanciaKm": 2405,
+      "aeronaves": [
+        "Avion Comercial"
+      ],
+      "costoBase": 361,
+      "estanciaMinima": 3.0
+    },
+    {
+      "origen": "PTY",
+      "destino": "CCS",
+      "distanciaKm": 1368,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 205,
+      "estanciaMinima": 1.7
+    },
+    {
+      "origen": "PTY",
+      "destino": "SDQ",
+      "distanciaKm": 1477,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 222,
+      "estanciaMinima": 1.8
+    },
+    {
+      "origen": "SJO",
+      "destino": "PTY",
+      "distanciaKm": 539,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional",
+        "Helice"
+      ],
+      "costoBase": 81,
+      "estanciaMinima": 0.7
+    },
+    {
+      "origen": "SJO",
+      "destino": "MIA",
+      "distanciaKm": 1805,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 271,
+      "estanciaMinima": 2.3
+    },
+    {
+      "origen": "SJO",
+      "destino": "SAL",
+      "distanciaKm": 652,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional",
+        "Helice"
+      ],
+      "costoBase": 98,
+      "estanciaMinima": 0.8
+    },
+    {
+      "origen": "SJO",
+      "destino": "GUA",
+      "distanciaKm": 855,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 128,
+      "estanciaMinima": 1.1
+    },
+    {
+      "origen": "SAL",
+      "destino": "GUA",
+      "distanciaKm": 203,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional",
+        "Helice"
+      ],
+      "costoBase": 0.0,
+      "estanciaMinima": 0.5
+    },
+    {
+      "origen": "SAL",
+      "destino": "MIA",
+      "distanciaKm": 1651,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 248,
+      "estanciaMinima": 2.1
+    },
+    {
+      "origen": "SAL",
+      "destino": "MEX",
+      "distanciaKm": 1253,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 188,
+      "estanciaMinima": 1.6
+    },
+    {
+      "origen": "GUA",
+      "destino": "MEX",
+      "distanciaKm": 1050,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 158,
+      "estanciaMinima": 1.3
+    },
+    {
+      "origen": "GUA",
+      "destino": "MIA",
+      "distanciaKm": 1640,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 246,
+      "estanciaMinima": 2.0
+    },
+    {
+      "origen": "GUA",
+      "destino": "SAL",
+      "distanciaKm": 203,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional",
+        "Helice"
+      ],
+      "costoBase": 0.0,
+      "estanciaMinima": 0.5
+    },
+    {
+      "origen": "HAV",
+      "destino": "MIA",
+      "distanciaKm": 379,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional",
+        "Helice"
+      ],
+      "costoBase": 0.0,
+      "estanciaMinima": 0.5
+    },
+    {
+      "origen": "HAV",
+      "destino": "CUN",
+      "distanciaKm": 509,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional",
+        "Helice"
+      ],
+      "costoBase": 76,
+      "estanciaMinima": 0.6
+    },
+    {
+      "origen": "HAV",
+      "destino": "SDQ",
+      "distanciaKm": 1418,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 213,
+      "estanciaMinima": 1.8
+    },
+    {
+      "origen": "HAV",
+      "destino": "SJU",
+      "distanciaKm": 1779,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 267,
+      "estanciaMinima": 2.2
+    },
+    {
+      "origen": "HAV",
+      "destino": "PTY",
+      "distanciaKm": 1581,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 237,
+      "estanciaMinima": 2.0
+    },
+    {
+      "origen": "SDQ",
+      "destino": "SJU",
+      "distanciaKm": 387,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional",
+        "Helice"
+      ],
+      "costoBase": 0.0,
+      "estanciaMinima": 0.5
+    },
+    {
+      "origen": "SDQ",
+      "destino": "MIA",
+      "distanciaKm": 1365,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 205,
+      "estanciaMinima": 1.7
+    },
+    {
+      "origen": "SDQ",
+      "destino": "PTY",
+      "distanciaKm": 1477,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 222,
+      "estanciaMinima": 1.8
+    },
+    {
+      "origen": "SDQ",
+      "destino": "CCS",
+      "distanciaKm": 917,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 138,
+      "estanciaMinima": 1.1
+    },
+    {
+      "origen": "SJU",
+      "destino": "MIA",
+      "distanciaKm": 1682,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 252,
+      "estanciaMinima": 2.1
+    },
+    {
+      "origen": "SJU",
+      "destino": "SDQ",
+      "distanciaKm": 387,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional",
+        "Helice"
+      ],
+      "costoBase": 0.0,
+      "estanciaMinima": 0.5
+    },
+    {
+      "origen": "SJU",
+      "destino": "CCS",
+      "distanciaKm": 878,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 132,
+      "estanciaMinima": 1.1
+    },
+    {
+      "origen": "SJU",
+      "destino": "JFK",
+      "distanciaKm": 2578,
+      "aeronaves": [
+        "Avion Comercial"
+      ],
+      "costoBase": 387,
+      "estanciaMinima": 3.2
+    },
+    {
+      "origen": "MIA",
+      "destino": "JFK",
+      "distanciaKm": 1757,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 264,
+      "estanciaMinima": 2.2
+    },
+    {
+      "origen": "MIA",
+      "destino": "LAX",
+      "distanciaKm": 3763,
+      "aeronaves": [
+        "Avion Comercial"
+      ],
+      "costoBase": 564,
+      "estanciaMinima": 4.7
+    },
+    {
+      "origen": "MIA",
+      "destino": "SFO",
+      "distanciaKm": 4154,
+      "aeronaves": [
+        "Avion Comercial"
+      ],
+      "costoBase": 623,
+      "estanciaMinima": 5.2
+    },
+    {
+      "origen": "MIA",
+      "destino": "IAD",
+      "distanciaKm": 1487,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 223,
+      "estanciaMinima": 1.9
+    },
+    {
+      "origen": "MIA",
+      "destino": "ORD",
+      "distanciaKm": 1930,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 290,
+      "estanciaMinima": 2.4
+    },
+    {
+      "origen": "MIA",
+      "destino": "MEX",
+      "distanciaKm": 2045,
+      "aeronaves": [
+        "Avion Comercial"
+      ],
+      "costoBase": 307,
+      "estanciaMinima": 2.6
+    },
+    {
+      "origen": "MIA",
+      "destino": "CUN",
+      "distanciaKm": 855,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 128,
+      "estanciaMinima": 1.1
+    },
+    {
+      "origen": "MIA",
+      "destino": "PTY",
+      "distanciaKm": 1862,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 279,
+      "estanciaMinima": 2.3
+    },
+    {
+      "origen": "MIA",
+      "destino": "BOG",
+      "distanciaKm": 2435,
+      "aeronaves": [
+        "Avion Comercial"
+      ],
+      "costoBase": 365,
+      "estanciaMinima": 3.0
+    },
+    {
+      "origen": "MIA",
+      "destino": "CCS",
+      "distanciaKm": 2193,
+      "aeronaves": [
+        "Avion Comercial"
+      ],
+      "costoBase": 329,
+      "estanciaMinima": 2.7
+    },
+    {
+      "origen": "JFK",
+      "destino": "IAD",
+      "distanciaKm": 366,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional",
+        "Helice"
+      ],
+      "costoBase": 0.0,
+      "estanciaMinima": 0.5
+    },
+    {
+      "origen": "JFK",
+      "destino": "ORD",
+      "distanciaKm": 1188,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 178,
+      "estanciaMinima": 1.5
+    },
+    {
+      "origen": "JFK",
+      "destino": "MIA",
+      "distanciaKm": 1757,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 264,
+      "estanciaMinima": 2.2
+    },
+    {
+      "origen": "JFK",
+      "destino": "LAX",
+      "distanciaKm": 3974,
+      "aeronaves": [
+        "Avion Comercial"
+      ],
+      "costoBase": 596,
+      "estanciaMinima": 5.0
+    },
+    {
+      "origen": "JFK",
+      "destino": "SFO",
+      "distanciaKm": 4152,
+      "aeronaves": [
+        "Avion Comercial"
+      ],
+      "costoBase": 623,
+      "estanciaMinima": 5.2
+    },
+    {
+      "origen": "JFK",
+      "destino": "MAD",
+      "distanciaKm": 5762,
+      "aeronaves": [
+        "Avion Comercial"
+      ],
+      "costoBase": 864,
+      "estanciaMinima": 7.2
+    },
+    {
+      "origen": "JFK",
+      "destino": "CDG",
+      "distanciaKm": 5833,
+      "aeronaves": [
+        "Avion Comercial"
+      ],
+      "costoBase": 875,
+      "estanciaMinima": 7.3
+    },
+    {
+      "origen": "LAX",
+      "destino": "SFO",
+      "distanciaKm": 544,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional",
+        "Helice"
+      ],
+      "costoBase": 82,
+      "estanciaMinima": 0.7
+    },
+    {
+      "origen": "LAX",
+      "destino": "ORD",
+      "distanciaKm": 2802,
+      "aeronaves": [
+        "Avion Comercial"
+      ],
+      "costoBase": 420,
+      "estanciaMinima": 3.5
+    },
+    {
+      "origen": "LAX",
+      "destino": "MEX",
+      "distanciaKm": 2505,
+      "aeronaves": [
+        "Avion Comercial"
+      ],
+      "costoBase": 376,
+      "estanciaMinima": 3.1
+    },
+    {
+      "origen": "LAX",
+      "destino": "GDL",
+      "distanciaKm": 2106,
+      "aeronaves": [
+        "Avion Comercial"
+      ],
+      "costoBase": 316,
+      "estanciaMinima": 2.6
+    },
+    {
+      "origen": "SFO",
+      "destino": "LAX",
+      "distanciaKm": 544,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional",
+        "Helice"
+      ],
+      "costoBase": 82,
+      "estanciaMinima": 0.7
+    },
+    {
+      "origen": "SFO",
+      "destino": "ORD",
+      "distanciaKm": 2964,
+      "aeronaves": [
+        "Avion Comercial"
+      ],
+      "costoBase": 445,
+      "estanciaMinima": 3.7
+    },
+    {
+      "origen": "SFO",
+      "destino": "MEX",
+      "distanciaKm": 3034,
+      "aeronaves": [
+        "Avion Comercial"
+      ],
+      "costoBase": 455,
+      "estanciaMinima": 3.8
+    },
+    {
+      "origen": "IAD",
+      "destino": "JFK",
+      "distanciaKm": 366,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional",
+        "Helice"
+      ],
+      "costoBase": 0.0,
+      "estanciaMinima": 0.5
+    },
+    {
+      "origen": "IAD",
+      "destino": "ORD",
+      "distanciaKm": 945,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 142,
+      "estanciaMinima": 1.2
+    },
+    {
+      "origen": "IAD",
+      "destino": "MIA",
+      "distanciaKm": 1487,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 223,
+      "estanciaMinima": 1.9
+    },
+    {
+      "origen": "IAD",
+      "destino": "MAD",
+      "distanciaKm": 6127,
+      "aeronaves": [
+        "Avion Comercial"
+      ],
+      "costoBase": 919,
+      "estanciaMinima": 7.7
+    },
+    {
+      "origen": "ORD",
+      "destino": "JFK",
+      "distanciaKm": 1188,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 178,
+      "estanciaMinima": 1.5
+    },
+    {
+      "origen": "ORD",
+      "destino": "LAX",
+      "distanciaKm": 2802,
+      "aeronaves": [
+        "Avion Comercial"
+      ],
+      "costoBase": 420,
+      "estanciaMinima": 3.5
+    },
+    {
+      "origen": "ORD",
+      "destino": "SFO",
+      "distanciaKm": 2964,
+      "aeronaves": [
+        "Avion Comercial"
+      ],
+      "costoBase": 445,
+      "estanciaMinima": 3.7
+    },
+    {
+      "origen": "ORD",
+      "destino": "IAD",
+      "distanciaKm": 945,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 142,
+      "estanciaMinima": 1.2
+    },
+    {
+      "origen": "ORD",
+      "destino": "MEX",
+      "distanciaKm": 2716,
+      "aeronaves": [
+        "Avion Comercial"
+      ],
+      "costoBase": 407,
+      "estanciaMinima": 3.4
+    },
+    {
+      "origen": "MAD",
+      "destino": "CDG",
+      "distanciaKm": 1064,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 160,
+      "estanciaMinima": 1.3
+    },
+    {
+      "origen": "MAD",
+      "destino": "JFK",
+      "distanciaKm": 5762,
+      "aeronaves": [
+        "Avion Comercial"
+      ],
+      "costoBase": 864,
+      "estanciaMinima": 7.2
+    },
+    {
+      "origen": "MAD",
+      "destino": "IAD",
+      "distanciaKm": 6127,
+      "aeronaves": [
+        "Avion Comercial"
+      ],
+      "costoBase": 919,
+      "estanciaMinima": 7.7
+    },
+    {
+      "origen": "MAD",
+      "destino": "GRU",
+      "distanciaKm": 8378,
+      "aeronaves": [
+        "Avion Comercial"
+      ],
+      "costoBase": 1257,
+      "estanciaMinima": 10.5
+    },
+    {
+      "origen": "MAD",
+      "destino": "EZE",
+      "distanciaKm": 10085,
+      "aeronaves": [
+        "Avion Comercial"
+      ],
+      "costoBase": 1513,
+      "estanciaMinima": 12.6
+    },
+    {
+      "origen": "CDG",
+      "destino": "MAD",
+      "distanciaKm": 1064,
+      "aeronaves": [
+        "Avion Comercial",
+        "Avion Regional"
+      ],
+      "costoBase": 160,
+      "estanciaMinima": 1.3
+    },
+    {
+      "origen": "CDG",
+      "destino": "JFK",
+      "distanciaKm": 5833,
+      "aeronaves": [
+        "Avion Comercial"
+      ],
+      "costoBase": 875,
+      "estanciaMinima": 7.3
+    },
+    {
+      "origen": "CDG",
+      "destino": "IAD",
+      "distanciaKm": 6197,
+      "aeronaves": [
+        "Avion Comercial"
+      ],
+      "costoBase": 930,
+      "estanciaMinima": 7.7
+    },
+    {
+      "origen": "CDG",
+      "destino": "GRU",
+      "distanciaKm": 9405,
+      "aeronaves": [
+        "Avion Comercial"
+      ],
+      "costoBase": 1411,
+      "estanciaMinima": 11.8
+    }
+  ]
+}

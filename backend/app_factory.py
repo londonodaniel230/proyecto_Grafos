@@ -16,4 +16,8 @@ def create_app():
     def index():
         return app.send_static_file("index.html")
 
+    @app.get("/frontend/")
+    def frontend_index():
+        return app.send_static_file("index.html")
+
     return app
