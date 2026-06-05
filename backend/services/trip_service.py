@@ -402,7 +402,10 @@ class TripService:
             flight.progress = flight.elapsed_h / flight.tiempo_vuelo_h
 
         if flight.progress >= 1.0:
+            flight.completed = True
+            snapshot = self._flight_snapshot()
             self._finalizar_vuelo(snapshot_origen_id=None)
+            return snapshot
 
         return self._flight_snapshot()
 
@@ -441,6 +444,11 @@ class TripService:
         flight.cancelled = True
         origen_tramo = flight.origen_id
         destino_original = self.destination_target_id or flight.destino_id
+
+        # Reembolsar el costo del vuelo cancelado
+        costo_a_reembolsar = flight.costo_total
+        self.current_budget += costo_a_reembolsar
+        self.total_spent -= costo_a_reembolsar
 
         # El viajero se queda en el origen del tramo cancelado
         self.current_node_id = origen_tramo

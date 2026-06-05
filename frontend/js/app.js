@@ -39,6 +39,7 @@ const searchController = new RouteSearchController({
 const tripForm = document.getElementById("trip-form");
 const tripController = new TripController({
   formEl: tripForm, store, renderer, api,
+  onViewSwitch: switchToView,
 });
 
 // ===== Menu / View switching =====
@@ -52,6 +53,15 @@ function toggleMenu() {
   menuToggle.classList.toggle("open");
   sideMenu.classList.toggle("open");
   menuOverlay.classList.toggle("hidden");
+}
+
+function switchToView(viewName) {
+  document.querySelectorAll(".menu-item").forEach((mi) => mi.classList.remove("active"));
+  const targetItem = document.querySelector(`.menu-item[data-view="${viewName}"]`);
+  if (targetItem) targetItem.classList.add("active");
+  document.querySelectorAll(".view-panel").forEach((vp) => vp.classList.remove("active"));
+  const targetPanel = document.getElementById(`view-${viewName}`);
+  if (targetPanel) targetPanel.classList.add("active");
 }
 
 menuToggle.addEventListener("click", toggleMenu);
@@ -270,6 +280,7 @@ if (blockForm) {
     try {
       await api.blockRoute(payload);
       await refreshBlocked();
+      tripController.interruptIfRouteMatches(payload.origen, payload.destino);
     } catch (err) {
       alert(err.message || "Error al bloquear.");
     }

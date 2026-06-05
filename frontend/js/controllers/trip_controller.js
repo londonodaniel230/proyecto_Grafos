@@ -1,9 +1,10 @@
 export class TripController {
-  constructor({ formEl, store, renderer, api }) {
+  constructor({ formEl, store, renderer, api, onViewSwitch }) {
     this.formEl = formEl;
     this.store = store;
     this.renderer = renderer;
     this.api = api;
+    this.onViewSwitch = onViewSwitch || null;
 
     this.originInput = null;
     this.budgetInput = null;
@@ -32,6 +33,25 @@ export class TripController {
 
   onGraphLoaded() {
     this._refreshSuggestions();
+  }
+
+  interruptIfRouteMatches(origen, destino) {
+    if (!this._flightInProgress) {
+      return false;
+    }
+    const flightOrigen = this.renderer._flightOrigenId;
+    const flightDestino = this.renderer._flightDestinoId;
+    if (!flightOrigen || !flightDestino) {
+      return false;
+    }
+    if (
+      (flightOrigen === origen && flightDestino === destino) ||
+      (flightOrigen === destino && flightDestino === origen)
+    ) {
+      this._manejarInterrupcion();
+      return true;
+    }
+    return false;
   }
 
   _cacheElements() {
@@ -386,6 +406,13 @@ export class TripController {
           this._onFlightCompleted(data);
           return;
         }
+        if (!snap || (!snap.enVuelo && !snap.completado)) {
+          this._flightTickHandle = null;
+          this._flightInProgress = false;
+          this._setActionsEnabled(true);
+          this._renderStep();
+          return;
+        }
       } catch (error) {
         this._flightTickHandle = null;
         this._flightInProgress = false;
@@ -444,6 +471,10 @@ export class TripController {
     this._stopBlockPoll();
 
     this._renderFlightStatus(null, "Vuelo interrumpido, regresando al origen...");
+
+    if (typeof this.onViewSwitch === "function") {
+      this.onViewSwitch("viaje");
+    }
 
     this.renderer.interruptFlightAnimation(async () => {
       try {

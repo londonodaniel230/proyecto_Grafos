@@ -239,32 +239,81 @@ export class MapRenderer {
         if (typeof onDone === "function") onDone();
         return;
       }
-      const startTime = performance.now();
-      const duration = 1500;
-      const startPos = this._flightMarker.getLatLng();
-      const endPos = L.latLng(this._flightOrigen[0], this._flightOrigen[1]);
-      const step = (now) => {
-        const t = Math.min(1, (now - startTime) / duration);
-        const lat = startPos.lat + (endPos.lat - startPos.lat) * t;
-        const lng = startPos.lng + (endPos.lng - startPos.lng) * t;
-        this._flightMarker.setLatLng([lat, lng]);
-        if (t < 1) {
-          requestAnimationFrame(step);
-        } else {
-          if (this._flightSegment) {
-            this.routeLayer.removeLayer(this._flightSegment);
-            this._flightSegment = null;
-          }
-          if (this._flightMarker) {
-            this.routeLayer.removeLayer(this._flightMarker);
-            this._flightMarker = null;
-          }
-          this._flightOrigen = null;
-          this._flightDestino = null;
+
+      // Phase 1: Show blocked route in red with flash
+      if (this._flightSegment) {
+        this._flightSegment.setStyle({
+          color: "#ef4444",
+          weight: 6,
+          opacity: 1,
+          dashArray: "12, 6",
+        });
+      }
+
+      // Change marker to warning state
+      if (this._flightMarker) {
+        this._flightMarker.setIcon(L.divIcon({
+          className: "aircraft-marker",
+          html: '<div class="aircraft-marker-inner aircraft-marker-returning">&#9888;</div>',
+          iconSize: [28, 28],
+          iconAnchor: [14, 14],
+        }));
+      }
+
+      // Phase 2: After a brief pause for the visual warning, animate back to origin
+      const pauseDuration = 600;
+      setTimeout(() => {
+        if (!this._flightMarker || !this._flightOrigen) {
           if (typeof onDone === "function") onDone();
+          return;
         }
-      };
-      requestAnimationFrame(step);
+
+        const startTime = performance.now();
+        const duration = 1500;
+        const startPos = this._flightMarker.getLatLng();
+        const endPos = L.latLng(this._flightOrigen[0], this._flightOrigen[1]);
+
+        // Add a return path polyline
+        const returnLine = L.polyline(
+          [[startPos.lat, startPos.lng], [endPos.lat, endPos.lng]],
+          {
+            color: "#f59e0b",
+            weight: 3,
+            opacity: 0.7,
+            dashArray: "8, 8",
+          }
+        ).addTo(this.routeLayer);
+
+        const step = (now) => {
+          const t = Math.min(1, (now - startTime) / duration);
+          const eased = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+          const lat = startPos.lat + (endPos.lat - startPos.lat) * eased;
+          const lng = startPos.lng + (endPos.lng - startPos.lng) * eased;
+          if (this._flightMarker) {
+            this._flightMarker.setLatLng([lat, lng]);
+          }
+          if (t < 1) {
+            requestAnimationFrame(step);
+          } else {
+            // Cleanup
+            if (returnLine) {
+              this.routeLayer.removeLayer(returnLine);
+            }
+            if (this._flightSegment) {
+              this.routeLayer.removeLayer(this._flightSegment);
+              this._flightSegment = null;
+            }
+            if (this._flightMarker) {
+              this.routeLayer.removeLayer(this._flightMarker);
+              this._flightMarker = null;
+            }
+            this._flightOrigen = null;
+            this._flightDestino = null;
+            if (typeof onDone === "function") onDone();
+          }
+        };
+        requestAnimationFrame(step);
+      }, pauseDuration);
     }
 
     stopFlightAnimation() {
