@@ -1,15 +1,13 @@
 from flask import Blueprint, jsonify, request
 
 from .errors import ValidationError
-from .services.blocked_routes import RouteBlocker
+from .services.blocked_routes import get_route_blocker
 from .services.geocoding import geocode_country
 from .services.graph_loader import GraphLoader
 from .services.path_algorithms import CostOptions, TraversalConstraints
 from .services.route_optimizer import optimizar_ruta
 from .services.route_planner import planificar_dos_alternativas
 from .services.trip_service import TripService
-
-_route_blocker = RouteBlocker()
 
 api_bp = Blueprint("api", __name__, url_prefix="/api")
 
@@ -110,7 +108,7 @@ def optimize_route():
             inicio_ids=inicio_ids,
             destino_ids=destino_ids,
             restricciones=restricciones,
-            rutas_bloqueadas=_route_blocker.get_blocked(),
+            rutas_bloqueadas=get_route_blocker().get_blocked(),
         )
         return jsonify(resultado.to_dict())
     except ValidationError as exc:
@@ -156,12 +154,13 @@ def block_route():
         destino = (payload.get("destino") or "").strip()
         if not origen or not destino:
             raise ValidationError(["origen and destino are required."])
-        _route_blocker.block(origen, destino)
+        blocker = get_route_blocker()
+        blocker.block(origen, destino)
         return jsonify({
             "status": "blocked",
             "origen": origen,
             "destino": destino,
-            "blocked": _route_blocker.get_blocked(),
+            "blocked": blocker.get_blocked(),
         })
     except ValidationError as exc:
         return jsonify({"errors": exc.errors}), 400
@@ -177,12 +176,13 @@ def unblock_route():
         destino = (payload.get("destino") or "").strip()
         if not origen or not destino:
             raise ValidationError(["origen and destino are required."])
-        _route_blocker.unblock(origen, destino)
+        blocker = get_route_blocker()
+        blocker.unblock(origen, destino)
         return jsonify({
             "status": "unblocked",
             "origen": origen,
             "destino": destino,
-            "blocked": _route_blocker.get_blocked(),
+            "blocked": blocker.get_blocked(),
         })
     except ValidationError as exc:
         return jsonify({"errors": exc.errors}), 400
@@ -190,7 +190,7 @@ def unblock_route():
 
 @api_bp.get("/route/blocked")
 def list_blocked_routes():
-    return jsonify({"blocked": _route_blocker.get_blocked()})
+    return jsonify({"blocked": get_route_blocker().get_blocked()})
 
 
 # ---------------------------------------------------------------------------
@@ -222,7 +222,7 @@ def plan_routes():
         tiempo = float(tiempo)
 
         from .services.route_optimizer import _filtrar_aristas_bloqueadas
-        graph_filtrado = _filtrar_aristas_bloqueadas(graph, _route_blocker.get_blocked())
+        graph_filtrado = _filtrar_aristas_bloqueadas(graph, get_route_blocker().get_blocked())
         resultados = planificar_dos_alternativas(graph_filtrado, origin_id, presupuesto, tiempo)
         return jsonify({
             "porPresupuesto": resultados["porPresupuesto"].to_dict(),
@@ -360,6 +360,44 @@ def trip_act():
                 )
             else:
                 step, error = service.realizar_vuelo(str(dest_id), str(aircraft))
+
+        elif action == "iniciar_vuelo":
+            dest_id = payload.get("destinationId") or payload.get("destination_id")
+            aircraft = payload.get("aircraftName") or payload.get("aircraft_name")
+            if not dest_id or not aircraft:
+                return jsonify({
+                    "errors": ["destinationId and aircraftName required."],
+                }), 400
+            snapshot, error = service.iniciar_vuelo(str(dest_id), str(aircraft))
+            if error:
+                return jsonify({"snapshot": snapshot, "error": error}), 400
+            return jsonify({
+                "snapshot": snapshot,
+                "step": service.get_step_options().to_dict(),
+            })
+
+        elif action == "avanzar_vuelo":
+            dt = payload.get("dtSegundos") or payload.get("dt_segundos")
+            if dt is None:
+                return jsonify({"errors": ["dtSegundos required."]}), 400
+            snapshot = service.avanzar_vuelo(float(dt))
+            if snapshot.get("completado"):
+                return jsonify({
+                    "snapshot": snapshot,
+                    "step": service.get_step_options().to_dict(),
+                })
+            return jsonify({"snapshot": snapshot})
+
+        elif action == "verificar_bloqueo":
+            bloqueado = service.verificar_bloqueo(route_blocker=get_route_blocker())
+            return jsonify({"bloqueado": bloqueado})
+
+        elif action == "cancelar_vuelo":
+            resultado = service.cancelar_vuelo_y_recalcular(
+                route_blocker=get_route_blocker()
+            )
+            resultado["step"] = service.get_step_options().to_dict()
+            return jsonify(resultado)
 
         elif action == "finalizar":
             report = service.finalizar_viaje()

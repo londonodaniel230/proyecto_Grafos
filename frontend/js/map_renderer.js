@@ -95,23 +95,204 @@ export class MapRenderer {
     this._setDetailsLines(lines);
   }
 
-  setTripPath(coords, camino) {
-    this._clearRoute();
-    if (coords.length >= 2) {
-      const line = L.polyline(coords, {
-        color: this.colors.trip,
-        weight: 4,
-        opacity: 0.8,
-        dashArray: "10, 6",
-      });
-      line.addTo(this.routeLayer);
+    setTripPath(coords, camino) {
+      this._clearRoute();
+      if (coords.length >= 2) {
+        const line = L.polyline(coords, {
+          color: this.colors.trip,
+          weight: 4,
+          opacity: 0.8,
+          dashArray: "10, 6",
+        });
+        line.addTo(this.routeLayer);
+      }
+      const pathStr = (camino || []).join(" -> ");
+      this._setDetailsLines([
+        "Viaje interactivo - Ruta:",
+        pathStr,
+      ]);
     }
-    const pathStr = (camino || []).join(" -> ");
-    this._setDetailsLines([
-      "Viaje interactivo - Ruta:",
-      pathStr,
-    ]);
-  }
+
+    startFlightAnimation({
+      origenLat,
+      origenLon,
+      destinoLat,
+      destinoLon,
+      origenId,
+      destinoId,
+      aeronave,
+      onProgress,
+      onComplete,
+      onInterrupted,
+    }) {
+      this.stopFlightAnimation();
+
+      this._flightSegment = L.polyline(
+        [
+          [origenLat, origenLon],
+          [destinoLat, destinoLon],
+        ],
+        {
+          color: this.colors.trip,
+          weight: 5,
+          opacity: 0.9,
+          dashArray: null,
+        }
+      ).addTo(this.routeLayer);
+
+      const icon = L.divIcon({
+        className: "aircraft-marker",
+        html: '<div class="aircraft-marker-inner">&#9992;</div>',
+        iconSize: [24, 24],
+        iconAnchor: [12, 12],
+      });
+      this._flightMarker = L.marker([origenLat, origenLon], {
+        icon,
+        interactive: false,
+      }).addTo(this.routeLayer);
+
+      this._flightOrigen = [origenLat, origenLon];
+      this._flightDestino = [destinoLat, destinoLon];
+      this._flightOrigenId = origenId;
+      this._flightDestinoId = destinoId;
+      this._flightAeronave = aeronave;
+      this._flightOnProgress = onProgress;
+      this._flightOnComplete = onComplete;
+      this._flightOnInterrupted = onInterrupted;
+      this._flightCancelled = false;
+      this._flightCompleted = false;
+
+      this._flightProgress = 0;
+      this._flightTargetProgress = 0;
+      this._flightStartTime = performance.now();
+
+      const tick = () => {
+        if (this._flightCancelled || this._flightCompleted) return;
+        if (!this._flightMarker) return;
+
+        const diff = this._flightTargetProgress - this._flightProgress;
+        if (Math.abs(diff) > 0.0001) {
+          const smoothing = 0.22;
+          this._flightProgress += diff * smoothing;
+          this.updateFlightPosition(this._flightProgress);
+        }
+
+        if (typeof this._flightOnProgress === "function") {
+          this._flightOnProgress();
+        }
+
+        this._flightRaf = requestAnimationFrame(tick);
+      };
+      this._flightRaf = requestAnimationFrame(tick);
+    }
+
+    setFlightTargetProgress(progress) {
+      if (this._flightTargetProgress === undefined) return;
+      const p = Math.max(0, Math.min(1, Number(progress) || 0));
+      if (p > this._flightTargetProgress) {
+        this._flightTargetProgress = p;
+      }
+    }
+
+    getFlightProgress() {
+      return this._flightProgress;
+    }
+
+    updateFlightPosition(progress) {
+      if (!this._flightMarker || !this._flightOrigen || !this._flightDestino) {
+        return;
+      }
+      const p = Math.max(0, Math.min(1, progress));
+      const [latO, lonO] = this._flightOrigen;
+      const [latD, lonD] = this._flightDestino;
+      const curLat = latO + (latD - latO) * p;
+      const curLon = lonO + (lonD - lonO) * p;
+      this._flightMarker.setLatLng([curLat, curLon]);
+    }
+
+    completeFlightAnimation() {
+      this._flightCompleted = true;
+      this._flightTargetProgress = 1;
+      this._flightProgress = 1;
+      if (this._flightRaf) {
+        cancelAnimationFrame(this._flightRaf);
+        this._flightRaf = null;
+      }
+      if (this._flightMarker) {
+        const [latD, lonD] = this._flightDestino || [0, 0];
+        this._flightMarker.setLatLng([latD, lonD]);
+      }
+      if (typeof this._flightOnComplete === "function") {
+        const cb = this._flightOnComplete;
+        this._flightOnComplete = null;
+        cb();
+      }
+    }
+
+    interruptFlightAnimation(onDone) {
+      this._flightCancelled = true;
+      if (this._flightRaf) {
+        cancelAnimationFrame(this._flightRaf);
+        this._flightRaf = null;
+      }
+      if (!this._flightMarker || !this._flightOrigen) {
+        if (typeof onDone === "function") onDone();
+        return;
+      }
+      const startTime = performance.now();
+      const duration = 1500;
+      const startPos = this._flightMarker.getLatLng();
+      const endPos = L.latLng(this._flightOrigen[0], this._flightOrigen[1]);
+      const step = (now) => {
+        const t = Math.min(1, (now - startTime) / duration);
+        const lat = startPos.lat + (endPos.lat - startPos.lat) * t;
+        const lng = startPos.lng + (endPos.lng - startPos.lng) * t;
+        this._flightMarker.setLatLng([lat, lng]);
+        if (t < 1) {
+          requestAnimationFrame(step);
+        } else {
+          if (this._flightSegment) {
+            this.routeLayer.removeLayer(this._flightSegment);
+            this._flightSegment = null;
+          }
+          if (this._flightMarker) {
+            this.routeLayer.removeLayer(this._flightMarker);
+            this._flightMarker = null;
+          }
+          this._flightOrigen = null;
+          this._flightDestino = null;
+          if (typeof onDone === "function") onDone();
+        }
+      };
+      requestAnimationFrame(step);
+    }
+
+    stopFlightAnimation() {
+      this._flightCancelled = true;
+      this._flightCompleted = true;
+      if (this._flightRaf) {
+        cancelAnimationFrame(this._flightRaf);
+        this._flightRaf = null;
+      }
+      if (this._flightSegment) {
+        this.routeLayer.removeLayer(this._flightSegment);
+        this._flightSegment = null;
+      }
+      if (this._flightMarker) {
+        this.routeLayer.removeLayer(this._flightMarker);
+        this._flightMarker = null;
+      }
+      this._flightOrigen = null;
+      this._flightDestino = null;
+      this._flightOrigenId = null;
+      this._flightDestinoId = null;
+      this._flightAeronave = null;
+      this._flightProgress = 0;
+      this._flightTargetProgress = 0;
+      this._flightOnProgress = null;
+      this._flightOnComplete = null;
+      this._flightOnInterrupted = null;
+    }
 
   _initMap() {
     this.map = L.map(this.mapEl, {
@@ -182,16 +363,17 @@ export class MapRenderer {
       );
       line.addTo(this.edgeLayer);
 
-      // Mostrar distancia en km sobre la arista (en capa independiente)
+      // Mostrar tipo de aeronave y distancia en km sobre la arista
       if (edge.distanciaKm) {
         const midLat = (from.lat + to.lat) / 2;
         const midLon = (from.lon + to.lon) / 2;
+        const aeronaves = (edge.aeronaves || []).join(", ") || "N/D";
         const label = L.marker([midLat, midLon], {
           icon: L.divIcon({
             className: "edge-label",
-            html: `${edge.distanciaKm} km`,
-            iconSize: [80, 20],
-            iconAnchor: [40, 10],
+            html: `<div class="edge-label-aircraft">${aeronaves}</div><div class="edge-label-distance">${edge.distanciaKm} km</div>`,
+            iconSize: [110, 34],
+            iconAnchor: [55, 17],
           }),
           interactive: false,
         });

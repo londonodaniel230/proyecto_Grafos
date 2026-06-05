@@ -1,4 +1,4 @@
-from typing import Dict, List, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 
 
 class RouteBlocker:
@@ -28,3 +28,14 @@ class RouteBlocker:
 
     def unblock_all(self) -> None:
         self._blocked.clear()
+
+
+# Singleton compartido para que el TripService pueda consultarlo
+_singleton: Optional["RouteBlocker"] = None
+
+
+def get_route_blocker() -> "RouteBlocker":
+    global _singleton
+    if _singleton is None:
+        _singleton = RouteBlocker()
+    return _singleton

@@ -110,6 +110,58 @@ export class ApiClient {
     return data;
   }
 
+  async iniciarVuelo(payload) {
+    const response = await fetch("/api/trip/act", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...payload, action: "iniciar_vuelo" }),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new ApiError(data.errors || [data.error || "Error al iniciar vuelo."]);
+    }
+    return data;
+  }
+
+  async avanzarVuelo(payload) {
+    const response = await fetch("/api/trip/act", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...payload, action: "avanzar_vuelo" }),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new ApiError(data.errors || ["Error al avanzar vuelo."]);
+    }
+    return data;
+  }
+
+  async verificarBloqueo(payload) {
+    const response = await fetch("/api/trip/act", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...payload, action: "verificar_bloqueo" }),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new ApiError(data.errors || ["Error al verificar bloqueo."]);
+    }
+    return data;
+  }
+
+  async cancelarVuelo(payload) {
+    const response = await fetch("/api/trip/act", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...payload, action: "cancelar_vuelo" }),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new ApiError(data.errors || ["Error al cancelar vuelo."]);
+    }
+    return data;
+  }
+
   async blockRoute(payload) {
     const response = await fetch("/api/route/block", {
       method: "POST",

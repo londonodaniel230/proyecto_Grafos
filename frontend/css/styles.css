@@ -474,16 +474,50 @@ details { border-top: 1px solid rgba(15,23,42,0.06); padding-top: 8px; }
 
 /* ===== Edge labels ===== */
 .edge-label {
-  background: rgba(255,255,255,0.9);
-  border: 1px solid rgba(15,23,42,0.1);
+  background: rgba(255,255,255,0.92);
+  border: 1px solid rgba(15,23,42,0.12);
   border-radius: 8px;
-  padding: 1px 6px;
+  padding: 2px 8px;
   font-size: 10px;
   font-weight: 600;
   color: var(--muted);
   text-align: center;
   white-space: nowrap;
   box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  line-height: 1.25;
+}
+.edge-label .edge-label-aircraft {
+  color: var(--accent, #0ea5a4);
+  font-weight: 700;
+}
+.edge-label .edge-label-distance {
+  color: var(--label, #0f172a);
+  font-weight: 600;
+}
+
+/* ===== Aircraft marker (vuelo progresivo) ===== */
+.aircraft-marker {
+  background: transparent;
+  border: 0;
+}
+.aircraft-marker-inner {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #8b5cf6;
+  color: #fff;
+  border-radius: 50%;
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.5),
+              0 0 0 4px rgba(139, 92, 246, 0.2);
+  animation: aircraft-pulse 1.4s ease-in-out infinite;
+}
+@keyframes aircraft-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
 }
 
 /* ===== Responsive ===== */

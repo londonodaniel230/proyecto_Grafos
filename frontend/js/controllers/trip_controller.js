@@ -15,6 +15,10 @@ export class TripController {
 
     this.sessionId = null;
     this.currentStep = null;
+
+    this._flightTickHandle = null;
+    this._flightPollHandle = null;
+    this._flightInProgress = false;
   }
 
   init() {
@@ -272,19 +276,286 @@ export class TripController {
         const subsidioTag = aero.esSubsidiada ? " [SUBSIDIADA]" : "";
         const btn = document.createElement("button");
         btn.className = "trip-action flight";
+        btn.disabled = this._flightInProgress;
         btn.textContent =
           `${vuelo.destinoNombre} (${vuelo.destinoCiudad}) ` +
           `via ${aero.nombre} - $${aero.costoTotal.toFixed(2)}, ` +
           `${aero.tiempoVueloHoras.toFixed(1)}h${subsidioTag}`;
         btn.addEventListener("click", () =>
-          this._doAction({
-            action: "vuelo",
-            destinationId: vuelo.destinoId,
-            aircraftName: aero.nombre,
-          })
+          this._iniciarVueloConAnimacion(
+            vuelo.destinoId,
+            aero.nombre
+          )
         );
         this.actionsEl.appendChild(btn);
       });
+    });
+  }
+
+  async _iniciarVueloConAnimacion(destinationId, aircraftName) {
+    if (this._flightInProgress) {
+      return;
+    }
+    this._flightInProgress = true;
+    this._setActionsEnabled(false);
+
+    try {
+      const data = await this.api.iniciarVuelo({
+        sessionId: this.sessionId,
+        destinationId,
+        aircraftName,
+      });
+      const snapshot = data.snapshot;
+      if (!snapshot || !snapshot.enVuelo) {
+        this._flightInProgress = false;
+        this._setActionsEnabled(true);
+        if (data.error) {
+          this._renderStep(data.error);
+        }
+        return;
+      }
+
+      if (data.step) {
+        this.currentStep = data.step;
+      }
+      this._renderFlightStatus(snapshot, "Vuelo en curso...");
+
+      this.renderer.startFlightAnimation({
+        origenLat: snapshot.latOrigen,
+        origenLon: snapshot.lonOrigen,
+        destinoLat: snapshot.latDestino,
+        destinoLon: snapshot.lonDestino,
+        origenId: snapshot.origenId,
+        destinoId: snapshot.destinoId,
+        aeronave: snapshot.aeronave,
+        onProgress: () => this._onFlightTick(),
+        onComplete: () => {},
+        onInterrupted: () => {},
+      });
+
+      this._scheduleFlightTick(snapshot.tiempoVueloHoras);
+      this._scheduleBlockPoll();
+    } catch (error) {
+      this._flightInProgress = false;
+      this._setActionsEnabled(true);
+      const messages =
+        error && error.messages
+          ? error.messages
+          : [error.message || "Error al iniciar vuelo."];
+      this._renderStep(messages.join("\n"));
+    }
+  }
+
+  _scheduleFlightTick(tiempoVueloHoras) {
+    if (this._flightTickHandle) {
+      clearTimeout(this._flightTickHandle);
+    }
+    const totalSegundosServidor = Math.max(tiempoVueloHoras, 0.01) * 3600;
+    const duracionAnimacionMs = Math.min(
+      Math.max(totalSegundosServidor * 50, 4000),
+      30000
+    );
+    const duracionAnimacionSeg = duracionAnimacionMs / 1000;
+    const factorEscalado = totalSegundosServidor / duracionAnimacionSeg;
+    const tickMs = 200;
+    const tickSegundosUI = tickMs / 1000;
+    const tickSegundosServidor = tickSegundosUI * factorEscalado;
+
+    const advance = async () => {
+      if (!this._flightInProgress) {
+        return;
+      }
+      try {
+        const data = await this.api.avanzarVuelo({
+          sessionId: this.sessionId,
+          dtSegundos: tickSegundosServidor,
+        });
+        const snap = data.snapshot;
+        if (snap && snap.enVuelo) {
+          this.renderer.setFlightTargetProgress(snap.progress);
+          this._renderFlightStatus(snap, "Vuelo en curso...");
+          if (snap.bloqueado) {
+            this._flightTickHandle = null;
+            await this._manejarInterrupcion();
+            return;
+          }
+        }
+        if (snap && snap.completado) {
+          this.renderer.setFlightTargetProgress(1);
+          this._flightTickHandle = null;
+          this._onFlightCompleted(data);
+          return;
+        }
+      } catch (error) {
+        this._flightTickHandle = null;
+        this._flightInProgress = false;
+        this._setActionsEnabled(true);
+        const messages =
+          error && error.messages
+            ? error.messages
+            : [error.message || "Error al avanzar vuelo."];
+        this._renderStep(messages.join("\n"));
+        return;
+      }
+
+      if (this._flightInProgress) {
+        this._flightTickHandle = setTimeout(advance, tickMs);
+      }
+    };
+
+    this._flightTickHandle = setTimeout(advance, tickMs);
+  }
+
+  _scheduleBlockPoll() {
+    if (this._flightPollHandle) {
+      clearInterval(this._flightPollHandle);
+    }
+    this._flightPollHandle = setInterval(async () => {
+      if (!this._flightInProgress) {
+        this._stopBlockPoll();
+        return;
+      }
+      try {
+        const data = await this.api.verificarBloqueo({
+          sessionId: this.sessionId,
+        });
+        if (data.bloqueado) {
+          this._stopBlockPoll();
+          await this._manejarInterrupcion();
+        }
+      } catch (error) {
+        /* ignore polling errors */
+      }
+    }, 1500);
+  }
+
+  _stopBlockPoll() {
+    if (this._flightPollHandle) {
+      clearInterval(this._flightPollHandle);
+      this._flightPollHandle = null;
+    }
+  }
+
+  async _manejarInterrupcion() {
+    if (this._flightTickHandle) {
+      clearTimeout(this._flightTickHandle);
+      this._flightTickHandle = null;
+    }
+    this._stopBlockPoll();
+
+    this._renderFlightStatus(null, "Vuelo interrumpido, regresando al origen...");
+
+    this.renderer.interruptFlightAnimation(async () => {
+      try {
+        const data = await this.api.cancelarVuelo({
+          sessionId: this.sessionId,
+        });
+        this._flightInProgress = false;
+        this._setActionsEnabled(true);
+        if (data.step) {
+          this.currentStep = data.step;
+        }
+        if (data.nuevaRuta) {
+          this.renderer.setRouteResult(data.nuevaRuta, {
+            label: "Ruta recalculada (tramo bloqueado)",
+            showDestinos: false,
+          });
+          const detalles = [
+            "Vuelo interrumpido. El viajero regreso al origen del tramo.",
+            `Origen del tramo: ${data.origenTramo}`,
+            `Destino original: ${data.destinoOriginal}`,
+            "Nueva ruta: " + (data.nuevaRuta.camino || []).join(" -> "),
+          ];
+          this.statusEl.innerHTML = "";
+          detalles.forEach((linea) => {
+            const d = document.createElement("div");
+            d.textContent = linea;
+            this.statusEl.appendChild(d);
+          });
+          this._renderStep(
+            data.errorRecalc
+              ? `Recalculo: ${data.errorRecalc}`
+              : "Selecciona el primer vuelo de la nueva ruta."
+          );
+        } else {
+          this._renderStep(
+            data.errorRecalc
+              ? `No se pudo recalcular: ${data.errorRecalc}`
+              : "Vuelo cancelado. Elige otro destino."
+          );
+        }
+      } catch (error) {
+        this._flightInProgress = false;
+        this._setActionsEnabled(true);
+        const messages =
+          error && error.messages
+            ? error.messages
+            : [error.message || "Error al cancelar vuelo."];
+        this._renderStep(messages.join("\n"));
+      }
+    });
+  }
+
+  async _onFlightCompleted(data) {
+    this._stopBlockPoll();
+    this._flightInProgress = false;
+    this._setActionsEnabled(true);
+    this.renderer.completeFlightAnimation();
+    if (data.step) {
+      this.currentStep = data.step;
+    }
+    this._renderStep();
+  }
+
+  _onFlightTick() {
+    /* hook para futuras extensiones; la posición se actualiza en el loop principal */
+  }
+
+  _renderFlightStatus(snapshot, message) {
+    if (!this.statusEl) return;
+    const lines = [];
+    if (message) lines.push(message);
+    if (snapshot) {
+      const progress = (snapshot.progress || 0) * 100;
+      lines.push(
+        `Vuelo: ${snapshot.origenId} -> ${snapshot.destinoId}`
+      );
+      lines.push(
+        `Aeronave: ${snapshot.aeronave} | Distancia: ${snapshot.distanciaKm} km`
+      );
+      lines.push(
+        `Progreso: ${progress.toFixed(0)}%`
+      );
+      lines.push(
+        `Tiempo de vuelo: ${snapshot.tiempoVueloHoras} h`
+      );
+      if (snapshot.bloqueado) {
+        const warn = document.createElement("div");
+        warn.className = "trip-error";
+        warn.textContent = "Ruta bloqueada: interrumpiendo vuelo...";
+        this.statusEl.innerHTML = "";
+        lines.forEach((line) => {
+          const d = document.createElement("div");
+          d.textContent = line;
+          this.statusEl.appendChild(d);
+        });
+        this.statusEl.appendChild(warn);
+        return;
+      }
+    }
+    this.statusEl.innerHTML = "";
+    lines.forEach((line) => {
+      const div = document.createElement("div");
+      div.textContent = line;
+      this.statusEl.appendChild(div);
+    });
+  }
+
+  _setActionsEnabled(enabled) {
+    if (!this.actionsEl) return;
+    const buttons = this.actionsEl.querySelectorAll("button");
+    buttons.forEach((b) => {
+      b.disabled = !enabled;
     });
   }
 

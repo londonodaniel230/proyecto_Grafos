@@ -859,7 +859,7 @@ def dijkstra_por_tiempo(
         total_km=distancia_acum,
         encontrado=True,
         error=None,
-        total_costo=dist[destino_encontrado] / 60.0,  # Convertir minutos a horas
+        total_costo=dist[destino_encontrado],
     )
 
 

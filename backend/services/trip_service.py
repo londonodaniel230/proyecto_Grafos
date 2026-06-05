@@ -20,6 +20,7 @@ from ..models import (
     Graph,
     Job,
     Node,
+    RouteResult,
     StepOptions,
     TripDecision,
     TripReport,
@@ -27,6 +28,32 @@ from ..models import (
 
 # Umbral para poder trabajar: 35 % del presupuesto inicial
 TRABAJO_UMBRAL_PORC = 35.0
+
+
+class FlightState:
+    """Estado del vuelo en curso (movimiento progresivo)."""
+
+    def __init__(
+        self,
+        edge: Edge,
+        aircraft_name: str,
+        tiempo_vuelo_h: float,
+        estancia_h: float,
+        costo_total: float,
+        costo_vuelo: float,
+    ) -> None:
+        self.edge = edge
+        self.origen_id = edge.origen
+        self.destino_id = edge.destino
+        self.aircraft_name = aircraft_name
+        self.tiempo_vuelo_h = tiempo_vuelo_h
+        self.estancia_h = estancia_h
+        self.costo_total = costo_total
+        self.costo_vuelo = costo_vuelo
+        self.progress = 0.0
+        self.elapsed_h = 0.0
+        self.cancelled = False
+        self.completed = False
 
 
 class TripService:
@@ -53,6 +80,9 @@ class TripService:
 
         self.decisions: List[TripDecision] = []
         self.completed = False
+
+        self.current_flight: Optional[FlightState] = None
+        self.destination_target_id: Optional[str] = None
 
         self._init_config_values()
 
@@ -247,13 +277,21 @@ class TripService:
 
         return self.get_step_options(), None
 
-    def realizar_vuelo(
+    def iniciar_vuelo(
         self, destination_id: str, aircraft_name: str
-    ) -> Tuple[StepOptions, Optional[str]]:
-        """Realiza un vuelo desde el nodo actual al destino indicado."""
+    ) -> Tuple[Dict[str, Any], Optional[str]]:
+        """
+        Inicia un vuelo progresivo desde el nodo actual al destino indicado.
+
+        No teletransporta al viajero: crea un FlightState que se actualiza
+        mediante ``avanzar_vuelo``. Devuelve información de la posición
+        inicial y los datos de la animación.
+        """
+        if self.current_flight is not None:
+            return self._flight_snapshot(), "Ya hay un vuelo en curso."
+
         node = self._current_node()
 
-        # Encontrar la arista
         edge = None
         for e in self.graph.aristas:
             if e.origen == node.id and e.destino == destination_id:
@@ -261,69 +299,296 @@ class TripService:
                 break
 
         if edge is None:
-            return self.get_step_options(), "No existe ruta entre estos aeropuertos."
+            return {
+                "enVuelo": False,
+                "nodeId": node.id,
+            }, "No existe ruta entre estos aeropuertos."
 
-        # Obtener configuración de la aeronave
         ac_config = self.aircraft_config.get(aircraft_name)
         if ac_config is None:
-            return self.get_step_options(), f"Aeronave '{aircraft_name}' no configurada."
+            return {
+                "enVuelo": False,
+                "nodeId": node.id,
+            }, f"Aeronave '{aircraft_name}' no configurada."
 
         costo_km = float(ac_config.costo_km)
         tiempo_km = float(ac_config.tiempo_km)
 
-        # Calcular costo y tiempo
         costo_vuelo = edge.distancia_km * costo_km
         costo_total = float(edge.costo_base) + costo_vuelo
-        tiempo_vuelo_h = (edge.distancia_km * tiempo_km) / 60.0  # convertir min a horas
+        tiempo_vuelo_h = edge.distancia_km * tiempo_km
 
-        # Validar presupuesto
         if costo_total > self.current_budget:
-            return self.get_step_options(), "Presupuesto insuficiente para este vuelo."
+            return {
+                "enVuelo": False,
+                "nodeId": node.id,
+            }, "Presupuesto insuficiente para este vuelo."
 
-        # Validar subsidio (costo_base == 0) no más del 20% de distancia total
         if float(edge.costo_base) == 0.0 or costo_vuelo == 0.0:
             subsidio_limite = self._subsidized_distance_limit(edge.distancia_km)
             if edge.distancia_km > subsidio_limite:
-                return (
-                    self.get_step_options(),
-                    f"Ruta subsidiada supera el 20% de distancia ({subsidio_limite:.0f} km máximo).",
+                return {
+                    "enVuelo": False,
+                    "nodeId": node.id,
+                }, (
+                    f"Ruta subsidiada supera el 20% de distancia "
+                    f"({subsidio_limite:.0f} km máximo)."
                 )
 
-        # Aplicar costos
+        # Descontar costo y registrar inicio
         self.current_budget -= costo_total
         self.total_spent += costo_total
 
-        # Avanzar tiempo (vuelo + estancia mínima en destino)
-        self.time_elapsed_hours += tiempo_vuelo_h + float(edge.estancia_minima)
+        self.current_flight = FlightState(
+            edge=edge,
+            aircraft_name=aircraft_name,
+            tiempo_vuelo_h=tiempo_vuelo_h,
+            estancia_h=float(edge.estancia_minima),
+            costo_total=costo_total,
+            costo_vuelo=costo_vuelo,
+        )
+        self.destination_target_id = destination_id
 
-        # Verificar alimentación durante el vuelo
-        self._check_food_during_flight(tiempo_vuelo_h)
+        return self._flight_snapshot(), None
 
-        # Actualizar nodo actual
-        self.current_node_id = destination_id
-        if destination_id not in self.visited_nodes:
-            self.visited_nodes.append(destination_id)
+    def realizar_vuelo(
+        self, destination_id: str, aircraft_name: str
+    ) -> Tuple[StepOptions, Optional[str]]:
+        """Compatibilidad: inicia el vuelo y lo completa de inmediato."""
+        snapshot, error = self.iniciar_vuelo(destination_id, aircraft_name)
+        if error:
+            return self.get_step_options(), error
 
-        dest_node = self.nodes_by_id.get(destination_id)
-        dest_nombre = dest_node.nombre if dest_node else destination_id
+        # Completar inmediatamente (modo síncrono, para tests / uso sin UI)
+        node = self._current_node()
+        flight = self.current_flight
+        if flight is None:
+            return self.get_step_options(), "Vuelo no disponible."
+
+        flight.elapsed_h = flight.tiempo_vuelo_h
+        flight.progress = 1.0
+        self._finalizar_vuelo(snapshot_origen_id=node.id)
+        return self.get_step_options(), None
+
+    def avanzar_vuelo(self, dt_segundos: float) -> Dict[str, Any]:
+        """
+        Avanza la simulación del vuelo en curso en ``dt_segundos`` segundos.
+
+        Devuelve un snapshot con el progreso, posición interpolada y estado
+        del vuelo (``enVuelo``, ``completado``, ``bloqueado``).
+        """
+        if self.current_flight is None:
+            return {
+                "enVuelo": False,
+                "completado": False,
+                "bloqueado": False,
+                "nodeId": self.current_node_id,
+                "progress": 0.0,
+            }
+
+        flight = self.current_flight
+        if flight.completed or flight.cancelled:
+            return self._flight_snapshot()
+
+        total_time = flight.tiempo_vuelo_h * 3600.0
+        if total_time <= 0:
+            flight.progress = 1.0
+            flight.elapsed_h = flight.tiempo_vuelo_h
+        else:
+            flight.elapsed_h = min(
+                flight.tiempo_vuelo_h,
+                flight.elapsed_h + dt_segundos / 3600.0,
+            )
+            flight.progress = flight.elapsed_h / flight.tiempo_vuelo_h
+
+        if flight.progress >= 1.0:
+            self._finalizar_vuelo(snapshot_origen_id=None)
+
+        return self._flight_snapshot()
+
+    def verificar_bloqueo(self, route_blocker=None) -> bool:
+        """Retorna True si el segmento actual está bloqueado en tiempo real."""
+        if self.current_flight is None:
+            return False
+        if route_blocker is None:
+            from .blocked_routes import get_route_blocker
+            route_blocker = get_route_blocker()
+        return route_blocker.is_blocked(
+            self.current_flight.origen_id,
+            self.current_flight.destino_id,
+        )
+
+    def cancelar_vuelo_y_recalcular(
+        self, route_blocker=None
+    ) -> Dict[str, Any]:
+        """
+        Cancela el vuelo en curso, devuelve al viajero al origen del tramo
+        y recalcula una nueva ruta hasta el destino original, evitando el
+        tramo bloqueado.
+
+        Retorna un diccionario con:
+            - cancelado: True
+            - nuevaRuta: RouteResult.to_dict() o None si no hay ruta
+            - snapshot: snapshot final del vuelo cancelado
+        """
+        if self.current_flight is None:
+            return {
+                "cancelado": False,
+                "error": "No hay vuelo en curso.",
+            }
+
+        flight = self.current_flight
+        flight.cancelled = True
+        origen_tramo = flight.origen_id
+        destino_original = self.destination_target_id or flight.destino_id
+
+        # El viajero se queda en el origen del tramo cancelado
+        self.current_node_id = origen_tramo
+        self.current_flight = None
+
+        # Intentar recalcular una ruta alternativa
+        nueva_ruta: Optional[RouteResult] = None
+        error_recalc: Optional[str] = None
+        try:
+            from .route_optimizer import optimizar_ruta
+
+            blocked = route_blocker.get_blocked() if route_blocker else []
+            nueva_ruta = optimizar_ruta(
+                self.graph,
+                origen_tramo,
+                destino_original,
+                modo="distancia",
+                rutas_bloqueadas=blocked,
+            )
+            if not nueva_ruta.encontrado:
+                error_recalc = nueva_ruta.error
+        except Exception as exc:  # noqa: BLE001
+            error_recalc = str(exc)
+
+        # Registrar la cancelación como decisión
+        self.decisions.append(TripDecision(
+            tipo="vuelo_cancelado",
+            node_id=origen_tramo,
+            detalle={
+                "origen": origen_tramo,
+                "destinoOriginal": destino_original,
+                "aeronave": flight.aircraft_name,
+                "distanciaKm": flight.edge.distancia_km,
+                "progressAlCancelar": round(flight.progress, 3),
+                "motivo": "Ruta bloqueada en tiempo real",
+            },
+            costo=0.0,
+            ingreso=0.0,
+            tiempo_invertido_horas=0.0,
+        ))
+
+        return {
+            "cancelado": True,
+            "origenTramo": origen_tramo,
+            "destinoOriginal": destino_original,
+            "nuevaRuta": nueva_ruta.to_dict() if nueva_ruta and nueva_ruta.encontrado else None,
+            "errorRecalc": error_recalc,
+            "snapshot": {
+                "origenId": origen_tramo,
+                "destinoId": flight.destino_id,
+                "progress": flight.progress,
+                "completado": False,
+                "bloqueado": True,
+                "enVuelo": False,
+            },
+        }
+
+    def _finalizar_vuelo(self, snapshot_origen_id: Optional[str]) -> None:
+        """Marca el vuelo como completado y aplica tiempos/costos al estado."""
+        if self.current_flight is None:
+            return
+
+        flight = self.current_flight
+        flight.completed = True
+        flight.progress = 1.0
+
+        # Aplicar tiempo total (vuelo + estancia mínima)
+        self.time_elapsed_hours += flight.tiempo_vuelo_h + flight.estancia_h
+
+        # Alimentación durante el vuelo
+        self._check_food_during_flight(flight.tiempo_vuelo_h)
+
+        # Mover al destino
+        self.current_node_id = flight.destino_id
+        if flight.destino_id not in self.visited_nodes:
+            self.visited_nodes.append(flight.destino_id)
 
         self.decisions.append(TripDecision(
             tipo="vuelo",
-            node_id=destination_id,
+            node_id=flight.destino_id,
             detalle={
-                "origen": node.id,
-                "aeronave": aircraft_name,
-                "distanciaKm": edge.distancia_km,
-                "costoVuelo": round(costo_vuelo, 2),
-                "costoBase": float(edge.costo_base),
-                "tiempoVueloHoras": round(tiempo_vuelo_h, 2),
+                "origen": flight.origen_id,
+                "aeronave": flight.aircraft_name,
+                "distanciaKm": flight.edge.distancia_km,
+                "costoVuelo": round(flight.costo_vuelo, 2),
+                "costoBase": float(flight.edge.costo_base),
+                "tiempoVueloHoras": round(flight.tiempo_vuelo_h, 2),
             },
-            costo=costo_total,
+            costo=flight.costo_total,
             ingreso=0.0,
-            tiempo_invertido_horas=tiempo_vuelo_h,
+            tiempo_invertido_horas=flight.tiempo_vuelo_h,
         ))
 
-        return self.get_step_options(), None
+        self.current_flight = None
+        self.destination_target_id = None
+
+    def _flight_snapshot(self) -> Dict[str, Any]:
+        """Devuelve un snapshot de la posición actual del vuelo en curso."""
+        if self.current_flight is None:
+            return {
+                "enVuelo": False,
+                "completado": False,
+                "bloqueado": False,
+                "nodeId": self.current_node_id,
+                "progress": 0.0,
+            }
+
+        flight = self.current_flight
+        origen = self.nodes_by_id.get(flight.origen_id)
+        destino = self.nodes_by_id.get(flight.destino_id)
+        if not origen or not destino:
+            return {
+                "enVuelo": False,
+                "completado": False,
+                "nodeId": self.current_node_id,
+                "progress": 0.0,
+            }
+
+        lat_o = float(origen.lat or 0.0)
+        lon_o = float(origen.lon or 0.0)
+        lat_d = float(destino.lat or 0.0)
+        lon_d = float(destino.lon or 0.0)
+
+        cur_lat = lat_o + (lat_d - lat_o) * flight.progress
+        cur_lon = lon_o + (lon_d - lon_o) * flight.progress
+
+        return {
+            "enVuelo": True,
+            "completado": flight.completed,
+            "bloqueado": self.verificar_bloqueo(),
+            "progress": flight.progress,
+            "origenId": flight.origen_id,
+            "destinoId": flight.destino_id,
+            "origenNombre": origen.nombre,
+            "destinoNombre": destino.nombre,
+            "latOrigen": lat_o,
+            "lonOrigen": lon_o,
+            "latDestino": lat_d,
+            "lonDestino": lon_d,
+            "latActual": cur_lat,
+            "lonActual": cur_lon,
+            "distanciaKm": flight.edge.distancia_km,
+            "aeronave": flight.aircraft_name,
+            "tiempoVueloHoras": round(flight.tiempo_vuelo_h, 3),
+            "estanciaHoras": round(flight.estancia_h, 3),
+            "costoTotal": round(flight.costo_total, 2),
+            "nodeId": self.current_node_id,
+        }
 
     def finalizar_viaje(self) -> TripReport:
         """Finaliza el viaje y genera el reporte."""
@@ -459,7 +724,7 @@ class TripService:
                 tiempo_km = float(ac_config.tiempo_km)
                 costo_vuelo = edge.distancia_km * costo_km
                 costo_total = float(edge.costo_base) + costo_vuelo
-                tiempo_vuelo_h = (edge.distancia_km * tiempo_km) / 60.0
+                tiempo_vuelo_h = edge.distancia_km * tiempo_km
 
                 # Marcar si es subsidiada
                 es_subsidiada = float(edge.costo_base) == 0.0 or costo_vuelo == 0.0
